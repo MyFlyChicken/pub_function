@@ -12,7 +12,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 /**
- * @brief 输入数值转换为BCD码
+ * @brief 十六进制BCD码转10进制
  * 
  * @param value 输入参数
  * @param size 参数字节数
@@ -50,7 +50,7 @@ uint32_t pub_hex2bcd(uint32_t value, uint8_t size)
 }
 
 /**
- * @brief 十进制转bcd码
+ * @brief 十进制转十六进制BCD码
  * 
  * @param value 
  * @return uint32_t 
@@ -66,7 +66,6 @@ uint32_t pub_bcd2hex(uint32_t value)
     res = value%10;
     do
     {
-        
         mid = value%10;
         res |= (mid << (i << 2));
         value /= 10;
