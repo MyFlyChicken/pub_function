@@ -13,6 +13,11 @@
 
 #include <stdint.h>
 
+typedef enum {
+    FALSE = 0,
+    TRUE  = !FALSE
+}PUB_BOOL;
+
 /**
  * @brief 强制转换宏
  * 

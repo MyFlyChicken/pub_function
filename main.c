@@ -62,7 +62,26 @@ void test_log_print(void)
     LOG_PRINTF_WARN("Warning\r\n");
     LOG_PRINTF_ERROR("Error\r\n");
     LOG_PRINTF_USER("Hello word!\r\n");
+}
 
+void test_memory_operate(void)
+{
+    uint8_t  byte_buf[6] = {0};
+    uint16_t halfword_buf[6] = {0};
+    uint32_t word_buf[6] = {0};
+
+    uint8_t  byte_buf1[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
+    uint16_t halfword_buf1[6] = {0x1111, 0x2222, 0x3333, 0x4444, 0x5555, 0x6666};
+    uint32_t word_buf1[6] = {0x11111111, 0x22222222, 0x33333333, 0x44444444, 0x55555555, 0x66666666};
+
+    memory_operate_init(NULL, printf);
+    memory_write_byte(byte_buf, (const uint8_t *)byte_buf1, 6);
+    memory_write_halfword(halfword_buf, (const uint16_t *)halfword_buf1, 6);
+    memory_write_word(word_buf, (const uint32_t *)word_buf1, 6);
+
+    memory_read_byte(byte_buf1, byte_buf, 6);
+    memory_read_halfword(halfword_buf1, halfword_buf, 6);
+    memory_read_word(word_buf1, word_buf, 6);
 }
 
 
@@ -88,7 +107,8 @@ void test_sprintf(void)
 void main()
 {
     //test_sprintf();
-    test_log_print();
+    //test_log_print();
+    test_memory_operate();
     //test_bcd_conv();
     //fifo_test();
     //test_sin_unsin();
