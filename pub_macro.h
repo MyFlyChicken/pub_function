@@ -13,11 +13,6 @@
 
 #include <stdint.h>
 
-typedef enum {
-    FALSE = 0,
-    TRUE  = !FALSE
-}PUB_BOOL;
-
 /**
  * @brief 强制转换宏
  * 
@@ -36,5 +31,8 @@ typedef enum {
 #define CONV2INT32_P(val)     ((int32_t *)(val))
 #define CONV2UINT32_P(val)    ((uint32_t *)(val))
 
+#define MATH_ABS(val)	((val>0)?val:0-val)
+#define MAX(A, B)		(A > B? A : B)
+#define MIN(A, B)		(A < B? A : B)
 
 #endif/* __PUB_MACRO_H__ */

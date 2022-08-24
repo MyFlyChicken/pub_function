@@ -108,9 +108,9 @@ void main()
 {
     //test_sprintf();
     //test_log_print();
-    test_memory_operate();
+    //test_memory_operate();
     //test_bcd_conv();
-    //fifo_test();
+    fifo_test();
     //test_sin_unsin();
     //getchar();
 }

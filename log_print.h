@@ -28,7 +28,7 @@ typedef enum __LOG_PRINT_LEVEL__{
         LOG_PRINT_NONE
 }LOG_PRINT_LEVEL;
 
-log_print_port g_log_print;
+extern log_print_port g_log_print;
 
 void log_print_init(log_print_port log_print, log_print_callback log_cb);
 void log_print_info(LOG_PRINT_LEVEL level, const char * file, int line, const char * func);
