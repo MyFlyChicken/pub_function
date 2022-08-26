@@ -35,4 +35,7 @@
 #define MAX(A, B)		(A > B? A : B)
 #define MIN(A, B)		(A < B? A : B)
 
+#define BIT(x)          (1<<x)
+
+
 #endif/* __PUB_MACRO_H__ */
