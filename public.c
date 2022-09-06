@@ -93,3 +93,55 @@ char * pub_sprintf(char *format, ...)
     va_end (args);
     return dest;
 }
+
+/**
+ * @brief 时间计数，秒周期调用，时间自动进位
+ * 
+ * @param p_time_count 需要
+ */
+void pub_time_counte(TIME_COUNTER *p_time_count)
+{
+    p_time_count->mid.second++;
+    if (p_time_count->mid.second >= 60)
+    {
+        p_time_count->mid.second = 0;
+        p_time_count->mid.minute++;
+    }
+    else
+    {
+        return;
+    }
+
+    if (p_time_count->mid.minute >= 60)
+    {
+        p_time_count->mid.minute = 0;
+        p_time_count->mid.hour++;
+    }
+    else
+    {
+        return;
+    }
+    
+    if (p_time_count->mid.hour >= 24)
+    {
+        p_time_count->mid.hour = 0;
+        p_time_count->mid.day++;
+    }
+    else
+    {
+        return;
+    }
+#if TIME_COUNTER_YEAR_EN
+    if (p_time_count->mid.day >=365)
+    {
+        p_time_count->mid.day = 0;
+        p_time_count->mid.year++;
+    }
+    else
+    {
+        return;
+    }
+#else
+    p_time_count->mid.day++;
+#endif
+}

@@ -84,7 +84,6 @@ void test_memory_operate(void)
     memory_read_word(word_buf1, word_buf, 6);
 }
 
-
 void test_bcd_conv()
 {
     uint8_t  a = 0x55;
@@ -104,13 +103,26 @@ void test_sprintf(void)
     printf("%s\r\n", pub_sprintf("0x%x", 0x123456));
 }
 
+void test_time_counter(void)
+{
+    uint32_t i;
+    TIME_COUNTER _counter;
+    _counter.count = 0;
+    for (i = 0; i < 640000; i++)
+    {
+        pub_time_counte(&_counter);
+    }
+    printf("year = %d, day = %d, hour = %d, minute = %d, sec = %d\r\n", _counter.mid.year, _counter.mid.day, _counter.mid.hour, _counter.mid.minute, _counter.mid.second);
+}
+
 void main()
 {
     //test_sprintf();
     //test_log_print();
     //test_memory_operate();
     //test_bcd_conv();
-    fifo_test();
+    //fifo_test();
+    test_time_counter();
     //test_sin_unsin();
     //getchar();
 }
