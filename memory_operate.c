@@ -187,14 +187,14 @@ uint8_t memory_read_byte(uint8_t *dest, const uint8_t *src, uint16_t length)
         j = length / 5;
         for (i = 0; i < j; i++)
         {
-            __memory_print("0x%2x, 0x%2x, 0x%2x, 0x%2x, 0x%2x\r\n", dest[i*5 + 0], dest[i*5 + 1], dest[i*5 + 2], 
+            __memory_print("0x%02x, 0x%02x, 0x%02x, 0x%02x, 0x%02x\r\n", dest[i*5 + 0], dest[i*5 + 1], dest[i*5 + 2], 
                                                                 dest[i*5 + 3], dest[i*5 + 4]);
         }
         j = length % 5;
         length /= 5;
         for (i = 0; i < j; i++)
         {
-            __memory_print("0x%2x", dest[length*5 + i]);
+            __memory_print("0x%02x", dest[length*5 + i]);
         }
         __memory_print("\r\n");
     }
@@ -235,14 +235,14 @@ uint8_t memory_read_halfword(uint16_t *dest, const uint16_t *src, uint16_t lengt
         j = length / 5;
         for (i = 0; i < j; i++)
         {
-            __memory_print("0x%4x, 0x%4x, 0x%4x, 0x%4x, 0x%4x\r\n", dest[i*5 + 0], dest[i*5 + 1], dest[i*5 + 2], 
+            __memory_print("0x%04x, 0x%04x, 0x%04x, 0x%04x, 0x%04x\r\n", dest[i*5 + 0], dest[i*5 + 1], dest[i*5 + 2], 
                                                                 dest[i*5 + 3], dest[i*5 + 4]);
         }
         j = length % 5;
         length /= 5;
         for (i = 0; i < j; i++)
         {
-            __memory_print("0x%4x", dest[length*5 + i]);
+            __memory_print("0x%04x", dest[length*5 + i]);
         }
         __memory_print("\r\n");
     }
@@ -283,14 +283,14 @@ uint8_t memory_read_word(uint32_t *dest, const uint32_t *src, uint16_t length)
         j = length / 5;
         for (i = 0; i < j; i++)
         {
-            __memory_print("0x%8x, 0x%8x, 0x%8x, 0x%8x, 0x%8x\r\n", dest[i*5 + 0], dest[i*5 + 1], dest[i*5 + 2], 
+            __memory_print("0x%08x, 0x%08x, 0x%08x, 0x%08x, 0x%08x\r\n", dest[i*5 + 0], dest[i*5 + 1], dest[i*5 + 2], 
                                                                 dest[i*5 + 3], dest[i*5 + 4]);
         }
         j = length % 5;
         length /= 5;
         for (i = 0; i < j; i++)
         {
-            __memory_print("0x%8x", dest[length*5 + i]);
+            __memory_print("0x%08x", dest[length*5 + i]);
         }
         __memory_print("\r\n");
     }

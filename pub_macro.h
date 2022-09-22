@@ -31,11 +31,23 @@
 #define CONV2INT32_P(val)     ((int32_t *)(val))
 #define CONV2UINT32_P(val)    ((uint32_t *)(val))
 
-#define MATH_ABS(val)	((val>0)?val:0-val)
+/**
+ * @brief 简易数学计算
+ * 
+ */
+#define MATH_ABS(val)	((val > 0) ? val : (0-val))
 #define MAX(A, B)		(A > B? A : B)
 #define MIN(A, B)		(A < B? A : B)
 
-#define BIT(x)          (1<<x)
+/**
+ * @brief 位操作
+ * 
+ */
+#define BIT(x)                       ((uint32_t)((uint32_t)0x01U<<(x)))
+#define BITS(start, end)             ((0xFFFFFFFFUL << (start)) & (0xFFFFFFFFUL >> (31U - (uint32_t)(end)))) 
+#define GET_BITS(regval, start, end) (((regval) & BITS((start),(end))) >> (start))
 
+#define GET_STRUCT_MEMBER_OFFSET(type, member) (uint32_t)(&(((type *)0)->member))
+#define GET_STRUCT_MEMBER_FR_ADDR(ptr, type, member) ((type *)((char *)(ptr) - GET_OFFSET(type,member)))
 
 #endif/* __PUB_MACRO_H__ */

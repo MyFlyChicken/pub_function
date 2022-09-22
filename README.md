@@ -3,7 +3,7 @@
 
 # 文件介绍
 1. fifo.* 先进先出模块，暂未实现可变数组扩展
-2. log_print.* log模块
+2. log_print.* log模块，分等级打印调试信息
 3. pub_macro.h 公用宏定义模块，需要继续扩展
 4. pub_memory.* 内存操作模块
 5. public.h 公用的小函数，需要继续扩展

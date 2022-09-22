@@ -1,6 +1,25 @@
 #include "public.h"
 #include <stdio.h>
 
+typedef struct  __BL_CTRL_VAR__
+{
+	uint16_t percent;        /* 出光功率占比 */
+	uint32_t delay_gap_ms;   /* 出光延长间隔，单位ms */
+	uint32_t laser_on_ms;    /* 激光打开时间，单位ms，因为laser_on_cnt计数会在delay_gap_cnt清0之后清0，所以需要加上delay_gap_ms */
+	uint16_t  laser_status;   /* 激光器状态，仅在模式为串口连续模式时进行控制 0关闭 1打开*/
+	volatile uint32_t delay_gap_cnt;
+	volatile uint32_t laser_on_cnt;
+} BL_CTRL_VAR;
+
+typedef struct __STRUCT_TEST__{
+ uint16_t lds_amp;
+ uint16_t overTempSet;
+ uint16_t ld1_amp;
+ uint16_t ld2_amp;
+ BL_CTRL_VAR ctr_var;
+ }STRUCT_TEST;
+
+
 void fifo_test()
 {
     uint16_t i, j, temp;
@@ -115,6 +134,15 @@ void test_time_counter(void)
     printf("year = %d, day = %d, hour = %d, minute = %d, sec = %d\r\n", _counter.mid.year, _counter.mid.day, _counter.mid.hour, _counter.mid.minute, _counter.mid.second);
 }
 
+void test_get_struct_member_offset(void)
+{
+    STRUCT_TEST AAA;
+    printf("percent = %d, laser_on_ms = %d\r\n", 
+    GET_STRUCT_MEMBER_OFFSET(STRUCT_TEST, ctr_var.percent)/2, 
+    GET_STRUCT_MEMBER_OFFSET(STRUCT_TEST, ctr_var.laser_on_ms)/2);
+
+}
+
 void main()
 {
     //test_sprintf();
@@ -122,7 +150,8 @@ void main()
     //test_memory_operate();
     //test_bcd_conv();
     //fifo_test();
-    test_time_counter();
+    //test_time_counter();
+    test_get_struct_member_offset();
     //test_sin_unsin();
     //getchar();
 }
