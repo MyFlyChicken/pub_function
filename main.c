@@ -1,25 +1,43 @@
 #include "public.h"
 #include <stdio.h>
 
+typedef enum _TEST_ENUM1_{
+AAA = 0X444444,
+}TEST_ENUM1;
+
+typedef enum _TEST_ENUM2_{
+BBB = 0X12,
+}TEST_ENUM2;
+
+typedef enum __BL_TRIG_MODE__
+{
+	BL_MODE_EXTERN_CONTINUE = 0,
+	BL_MODE_EXTERN_PULSE,
+	BL_MODE_SERIAL_PORT,
+	BL_MODE_FAIL,
+	BL_MODE_INVALID
+} BL_TRIG_MODE;
 typedef struct  __BL_CTRL_VAR__
 {
-	uint16_t percent;        /* 出光功率占比 */
+	uint8_t percent;        /* 出光功率占比 */
+	uint8_t laser_status;   /* 激光器状态，仅在模式为串口连续模式时进行控制 0关闭 1打开*/
+	//uint8_t rsvd1;
+	//uint8_t rsvd2;
 	uint32_t delay_gap_ms;   /* 出光延长间隔，单位ms */
 	uint32_t laser_on_ms;    /* 激光打开时间，单位ms，因为laser_on_cnt计数会在delay_gap_cnt清0之后清0，所以需要加上delay_gap_ms */
-	uint16_t  laser_status;   /* 激光器状态，仅在模式为串口连续模式时进行控制 0关闭 1打开*/
 	volatile uint32_t delay_gap_cnt;
 	volatile uint32_t laser_on_cnt;
-} BL_CTRL_VAR;
+} BL_CTRL_VAR __attribute__((packed));
+typedef struct __LD_LOGIC_VAR__{
+	uint8_t boot_flag;
+	uint8_t fan_work_temp;/* 风扇启动，默认为25 */
+	uint8_t ls_over_temp; /* 保护温度，默认为70 */
+	uint8_t print_status;/* 打印状态 */
+	BL_TRIG_MODE bl_run_mode;
+	BL_CTRL_VAR bl_var;
+}LD_LOGIC_VAR __attribute__((packed));/*aligned*/
 
-typedef struct __STRUCT_TEST__{
- uint16_t lds_amp;
- uint16_t overTempSet;
- uint16_t ld1_amp;
- uint16_t ld2_amp;
- BL_CTRL_VAR ctr_var;
- }STRUCT_TEST;
-
-
+LD_LOGIC_VAR g_ld_logic_var;
 void fifo_test()
 {
     uint16_t i, j, temp;
@@ -106,14 +124,13 @@ void test_memory_operate(void)
 void test_bcd_conv()
 {
     uint8_t  a = 0x55;
-    uint16_t b = 0x1299;
-    uint32_t c = 0x12345678;
+    uint16_t b = 0x255;
+    uint32_t c = 0x77;
     uint8_t  aa = 55;
-    uint16_t bb = 1299;
-    uint32_t cc = 12345678;
-    uint32_t dd = 123456789;
-    //printf("%d, %d, %d\r\n", pub_hex2bcd(a, sizeof(a)), pub_hex2bcd(b, sizeof(b)),pub_hex2bcd(c, sizeof(c)));
-    printf("%d, %d, %d, %d\r\n", pub_bcd2hex(aa), pub_bcd2hex(bb), pub_bcd2hex(cc), pub_bcd2hex(dd));
+    uint16_t bb = 166;
+    uint32_t cc = 77;
+    printf("%d, %d, %d\r\n", pub_bcd2dec(a, sizeof(a)), pub_bcd2dec(b, sizeof(b)),pub_bcd2dec(c, sizeof(c)));
+    printf("0x%x, 0x%x, 0x%x\r\n", pub_dec2bcd(aa), pub_dec2bcd(bb), pub_dec2bcd(cc));
     
 }
 
@@ -136,11 +153,41 @@ void test_time_counter(void)
 
 void test_get_struct_member_offset(void)
 {
-    STRUCT_TEST AAA;
-    printf("percent = %d, laser_on_ms = %d\r\n", 
-    GET_STRUCT_MEMBER_OFFSET(STRUCT_TEST, ctr_var.percent)/2, 
-    GET_STRUCT_MEMBER_OFFSET(STRUCT_TEST, ctr_var.laser_on_ms)/2);
+    uint8_t buffer[sizeof(LD_LOGIC_VAR)];
+    LD_LOGIC_VAR* p_ld_logic = (LD_LOGIC_VAR *)buffer;
 
+    buffer[0] = 10;
+    buffer[1] = 20;
+    buffer[2] = 30;
+    buffer[3] = 40;
+    buffer[4] = 0x01;
+    buffer[5] = 0x01;
+    buffer[6] = 0x01;
+    buffer[7] = 0x01;
+    buffer[4] = 0x01;
+    buffer[5] = 0x01;
+    buffer[6] = 0x01;
+    buffer[7] = 0x01;
+    buffer[8] = 50;
+    buffer[9] = 60;
+    buffer[10] = 70;
+    buffer[11] = 80;
+    buffer[12] = 0x02;
+    buffer[13] = 0x02;
+    buffer[14] = 0x02;
+    buffer[15] = 0x02;
+    buffer[16] = 0x04;
+    buffer[17] = 0x04;
+    buffer[18] = 0x04;
+    buffer[19] = 0x04;
+    buffer[20] = 0x08;
+    buffer[21] = 0x08;
+    buffer[22] = 0x08;
+    buffer[23] = 0x08;
+    printf("sizeof = %d, boot_flag = %d, fan_work_temp = %d, ls_over_temp = %d, print_status = %d,                                      \
+				percent = %d, delay_gap_ms = %d, laser_on_ms = %d, run_mode = %d\r\n", sizeof(LD_LOGIC_VAR),p_ld_logic->boot_flag,   \
+                p_ld_logic->fan_work_temp, p_ld_logic->ls_over_temp, p_ld_logic->print_status, p_ld_logic->bl_var.percent,  \
+                p_ld_logic->bl_var.delay_gap_ms,	p_ld_logic->bl_var.laser_on_ms, p_ld_logic->bl_run_mode);
 }
 
 void main()
@@ -148,10 +195,10 @@ void main()
     //test_sprintf();
     //test_log_print();
     //test_memory_operate();
-    //test_bcd_conv();
+    test_bcd_conv();
     //fifo_test();
     //test_time_counter();
-    test_get_struct_member_offset();
+    //test_get_struct_member_offset();
     //test_sin_unsin();
     //getchar();
 }

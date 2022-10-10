@@ -18,8 +18,9 @@
  * @param size 参数字节数
  * @return uint32_t 
  */
-uint32_t pub_hex2bcd(uint32_t value, uint8_t size)
+uint32_t pub_bcd2dec(uint32_t value, uint8_t size)
 {
+#if 1
     int8_t i, j;
     uint32_t tmp;
     uint32_t res;
@@ -34,7 +35,7 @@ uint32_t pub_hex2bcd(uint32_t value, uint8_t size)
         tmp = (value & bit);
         if (tmp)
         {
-            tmp >>= (i * 4);
+            tmp >>= (i << 2);
         }
         else
         {
@@ -47,6 +48,10 @@ uint32_t pub_hex2bcd(uint32_t value, uint8_t size)
         res += tmp;  
     }
     return res;
+#else /* 只能转换单字节 */
+    return (value - (value >> 4) * 6);
+#endif
+    
 }
 
 /**
@@ -55,8 +60,9 @@ uint32_t pub_hex2bcd(uint32_t value, uint8_t size)
  * @param value 
  * @return uint32_t 
  */
-uint32_t pub_bcd2hex(uint32_t value)
+uint32_t pub_dec2bcd(uint32_t value)
 {
+#if 1
     uint8_t i = 0;
     uint32_t mid, res;
 
@@ -73,6 +79,9 @@ uint32_t pub_bcd2hex(uint32_t value)
     } while (value);
 
     return res;
+#else /* 只能转换单字节 */
+    return (value + (value / 10) * 6);
+#endif
 }
 
 /**

@@ -7,8 +7,8 @@
 3. pub_macro.h 公用宏定义模块，需要继续扩展
 4. pub_memory.* 内存操作模块
 5. public.h 公用的小函数，需要继续扩展
-    5.1 pub_hex2bcd：十六进制BCD码转10进制
-    5.2 pub_bcd2hex：十进制转十六进制BCD码
+    5.1 pub_bcd2dec：十六进制BCD码转10进制
+    5.2 pub_dec2bcd：十进制转十六进制BCD码
     5.3 pub_sprintf: 格式化字符串
 6. memory_operate.* 内存操作模块，支持读flash（可指定输出方式：字符串、字、半字、字节，指定数   量），支持读写ram。内部会校验输入地址是否准确
 7. eeprom模块，支持eeprom新增/删除参数（须保证已经存在的参数不变），
