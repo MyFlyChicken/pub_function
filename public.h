@@ -35,8 +35,8 @@ typedef union __TIME_COUNTER__
 
 
 
-uint32_t pub_hex2bcd(uint32_t value, uint8_t size);
-uint32_t pub_bcd2hex(uint32_t value);
+uint32_t pub_bcd2dec(uint32_t value, uint8_t size);
+uint32_t pub_dec2bcd(uint32_t value);
 char * pub_sprintf(char *format, ...);
 void pub_time_counte(TIME_COUNTER *p_time_count);
 #endif
