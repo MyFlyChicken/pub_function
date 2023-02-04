@@ -62,6 +62,18 @@ void fifo_test()
     #endif
 }
 
+signed long test_stock(signed long principal, float amplitude, uint8_t timers)
+{
+    signed long ret = principal;
+
+    while (timers--)
+    {
+        ret = ret * amplitude + ret;
+    }
+    
+    return ret;
+}
+
 void test_sin_unsin(void)
 {
     int32_t val = -2;
@@ -122,6 +134,16 @@ void test_sprintf(void)
     printf("%s\r\n", pub_sprintf("0x%x", 0x123456));
 }
 
+void test_printf(void)
+{
+    uint16_t a = 99;
+    printf("%#x\r\n", 666);
+    printf("%#p\r\n", &a);
+    printf("%05d, %05d, %5d, %5d, %-5d\r\n", 11, 222, 3333, 4444, 5);
+    printf("%f, %lf, %hu\r\n", 11.22, 1.2222333333333,4294967295);
+    printf("%d\r\n", test_stock(3483, 0.1, 10)); 
+}
+
 void test_time_counter(void)
 {
     uint32_t i;
@@ -151,7 +173,8 @@ void main()
     //test_bcd_conv();
     //fifo_test();
     //test_time_counter();
-    test_get_struct_member_offset();
+    //test_get_struct_member_offset();
     //test_sin_unsin();
     //getchar();
+    test_printf();
 }
