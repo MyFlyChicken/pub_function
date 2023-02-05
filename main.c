@@ -40,38 +40,45 @@ typedef struct __LD_LOGIC_VAR__{
 LD_LOGIC_VAR g_ld_logic_var;
 void fifo_test()
 {
+    #define FIFO_BUFFER_SIZE 50
     uint16_t i, j, temp;
     FIFO _fifo;
     fifo_buffer_type pop_buffer[FIFO_BUFFER_SIZE] = {0};
-    const fifo_buffer_type mystring[]= {123,999,888,777,666,555,444,333,222,111, 789};
+    const fifo_buffer_type mystring[]= {1,2,3,4,5,6,7,8,9,10, 11};
     #if 1
-    fifo_init(&_fifo);
-    pub_memset(_fifo.buffer, 0, FIFO_BUFFER_SIZE);
+    fifo_init(&_fifo, pop_buffer, FIFO_BUFFER_SIZE);
+    pub_memset(_fifo.pbuffer, 0, FIFO_BUFFER_SIZE * sizeof(fifo_buffer_type));
+    for ( j = 0; j < FIFO_BUFFER_SIZE; j++)
+    {
+        /* code */
+        printf("%3d", *(_fifo.pbuffer + j));
+    }
+    printf("\nInit end\r\n");
     for ( i = 0; i < 10; i++)
     {
-        temp = fifo_push_bytes(&_fifo, mystring, sizeof(mystring));
+        temp = fifo_push_bytes(&_fifo, mystring, sizeof(mystring)/sizeof(fifo_buffer_type));
         //printf("%d---head = %d, tail = %d, temp = %d\r\n", i, _fifo.head, _fifo.tail, temp);
         for ( j = 0; j < FIFO_BUFFER_SIZE; j++)
         {
             /* code */
-            printf("%d  ", _fifo.buffer[j]);
+            printf("%3d", *(_fifo.pbuffer + j));
         }
         printf("\r\n");
     }
     printf("pop1---head = %d, tail = %d, %d\r\n",  _fifo.head, _fifo.tail, fifo_pop_bytes(&_fifo, pop_buffer, FIFO_BUFFER_SIZE));
     for ( j = 0; j < FIFO_BUFFER_SIZE; j++)
     {
-        if (_fifo.buffer[(j + _fifo.tail)%FIFO_BUFFER_SIZE] != pop_buffer[j])
+        if (*(_fifo.pbuffer + ((j + _fifo.tail)%FIFO_BUFFER_SIZE)) != pop_buffer[j])
         {
             printf("1read fail! %d,\r\n", j);
             break;
         }
     }
-    pub_memset(pop_buffer, 0, FIFO_BUFFER_SIZE);
+    pub_memset(pop_buffer, 0, FIFO_BUFFER_SIZE * sizeof(fifo_buffer_type));
     printf("pop2---head = %d, tail = %d, %d\r\n",  _fifo.head, _fifo.tail, fifo_pop_bytes_clear(&_fifo, pop_buffer, FIFO_BUFFER_SIZE));
     for ( j = 0; j < FIFO_BUFFER_SIZE; j++)
     {
-        if (_fifo.buffer[(j + _fifo.tail)%FIFO_BUFFER_SIZE] != pop_buffer[j])
+        if (*(_fifo.pbuffer + ((j + _fifo.tail)%FIFO_BUFFER_SIZE)) != pop_buffer[j])
         {
             printf("2read fail! %d,\r\n", j);
             break;
@@ -217,11 +224,11 @@ void main()
     //test_sprintf();
     //test_log_print();
     //test_memory_operate();
-    test_bcd_conv();
-    //fifo_test();
+    //test_bcd_conv();
+    fifo_test();
     //test_time_counter();
     //test_get_struct_member_offset();
     //test_sin_unsin();
     //getchar();
-    test_printf();
+    //test_printf();
 }

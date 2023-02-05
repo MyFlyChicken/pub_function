@@ -8,8 +8,10 @@
   */
 #include "fifo.h"
 
-void fifo_init(FIFO *p_fifo)
+void fifo_init(FIFO *p_fifo, fifo_buffer_type *p_buff, uint16_t numbers)
 {
+	p_fifo->numbers = numbers;
+	p_fifo->pbuffer = p_buff;
 	fifo_clear(p_fifo);
 }
 
@@ -38,19 +40,19 @@ uint16_t fifo_push_bytes(FIFO *p_fifo, const fifo_buffer_type *src, uint16_t len
 	for (i = p_fifo->head, k = 0; i < j; i++, k++)
 	{
 		/*自动覆盖*/
-		p_fifo->buffer[i % FIFO_BUFFER_SIZE] = *(src + k);
+		*(p_fifo->pbuffer + (i % p_fifo->numbers)) = *(src + k);
 	}
 	p_fifo->size += len;
 	/* 满了 */
-	if (p_fifo->size > FIFO_BUFFER_SIZE)
+	if (p_fifo->size > p_fifo->numbers)
 	{
-		p_fifo->head = i % FIFO_BUFFER_SIZE;
-		p_fifo->tail = i % FIFO_BUFFER_SIZE;
-		p_fifo->size = FIFO_BUFFER_SIZE;
+		p_fifo->head = i % p_fifo->numbers;
+		p_fifo->tail = i % p_fifo->numbers;
+		p_fifo->size = p_fifo->numbers;
 	}
 	else
 	{
-		p_fifo->head = i % FIFO_BUFFER_SIZE;
+		p_fifo->head = i % p_fifo->numbers;
 	}
 
 	return len;
@@ -75,8 +77,8 @@ uint16_t fifo_pop_bytes(FIFO *p_fifo, fifo_buffer_type *dest, uint16_t len)
 	cnt = p_fifo->tail;
 	for (i = 0; i < len; i++)
 	{
-		cnt %= FIFO_BUFFER_SIZE;
-		*(dest + i) = p_fifo->buffer[cnt++];
+		cnt %= p_fifo->numbers;
+		*(dest + i) = *(p_fifo->pbuffer + cnt++);
 	}
 	return len;
 }
@@ -99,8 +101,8 @@ uint16_t fifo_pop_bytes_clear(FIFO *p_fifo, fifo_buffer_type *dest, uint16_t len
 		return 0;
 	for (i = 0; i < len; i++)
 	{
-		p_fifo->tail %= FIFO_BUFFER_SIZE;
-		*(dest + i) = p_fifo->buffer[p_fifo->tail++];
+		p_fifo->tail %= p_fifo->numbers;
+		*(dest + i) = *(p_fifo->pbuffer + p_fifo->tail++);
 		p_fifo->size--;
 		if (0 == p_fifo->size)
 			return (i + 1);
@@ -114,17 +116,17 @@ void fifo_push_byte(FIFO *p_fifo, const fifo_buffer_type src)
 	if (0 == p_fifo)
 		return;
 
-	if (p_fifo->size >= FIFO_BUFFER_SIZE)
+	if (p_fifo->size >= p_fifo->numbers)
 	{
-		p_fifo->buffer[p_fifo->head] = src;
-		p_fifo->head = (p_fifo->head + 1) % FIFO_BUFFER_SIZE;
+		*(p_fifo->pbuffer + p_fifo->head) = src;
+		p_fifo->head = (p_fifo->head + 1) % p_fifo->numbers;
 		p_fifo->tail = p_fifo->head;
-		p_fifo->size = FIFO_BUFFER_SIZE;
+		p_fifo->size = p_fifo->numbers;
 	}
 	else
 	{
-		p_fifo->buffer[p_fifo->head] = src;
-		p_fifo->head = (p_fifo->head + 1) % FIFO_BUFFER_SIZE;
+		*(p_fifo->pbuffer + p_fifo->head) = src;
+		p_fifo->head = (p_fifo->head + 1) % p_fifo->numbers;
 		p_fifo->size++;
 	}
 }
@@ -143,7 +145,7 @@ uint8_t fifo_pop_byte(FIFO *p_fifo, fifo_buffer_type *dest)
 	/* 无数据 */
 	if (0 == p_fifo->size)
 		return 1;
-	*dest = p_fifo->buffer[p_fifo->tail];
+	*dest = *(p_fifo->pbuffer + p_fifo->tail);
 	return 0;
 }
 
@@ -154,8 +156,8 @@ uint8_t fifo_pop_byte_clear(FIFO *p_fifo, fifo_buffer_type *dest)
 	/* 无数据 */
 	if (0 == p_fifo->size)
 		return 1;
-	*dest = p_fifo->buffer[p_fifo->tail];
-	p_fifo->tail = (p_fifo->tail + 1) % FIFO_BUFFER_SIZE;
+	*dest = *(p_fifo->pbuffer + p_fifo->tail);
+	p_fifo->tail = (p_fifo->tail + 1) % p_fifo->numbers;
 	p_fifo->size--;
 	return 0;
 }

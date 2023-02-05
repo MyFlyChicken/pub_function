@@ -19,7 +19,6 @@
 /*************************************************************
  *                        宏                                 *
  ************************************************************/
-#define FIFO_BUFFER_SIZE    0x20UL
 
 /*************************************************************
  *                        常量                               *
@@ -32,17 +31,17 @@
  * @brief 该类型为fifo的buffer缓存的类型，由用户自定义
  *
  */
-typedef uint8_t fifo_buffer_type;
+typedef uint16_t fifo_buffer_type;
 
 typedef struct _FIFO_
 {
 	/* data */
-	fifo_buffer_type buffer[FIFO_BUFFER_SIZE];
-	/* 直接向变量的内存地址取值 */
+	fifo_buffer_type *pbuffer;
+	uint16_t          numbers;
+  /* 直接向变量的内存地址取值 */
 	volatile uint16_t head;
 	volatile uint16_t tail;
 	volatile uint16_t size;
-  const uint32_t fifo_number;/* 保留，用于拓展fifo，实现函数可重入 */
 } FIFO;
 /*************************************************************
  *                       变量                                *
@@ -51,7 +50,7 @@ typedef struct _FIFO_
 /*************************************************************
  *                       函数原型                            *
  ************************************************************/
-void fifo_init(FIFO *p_fifo);
+void fifo_init(FIFO *p_fifo, fifo_buffer_type *p_buff, uint16_t numbers);
 void fifo_clear(FIFO *p_fifo);
 uint16_t fifo_push_bytes(FIFO *p_fifo, const fifo_buffer_type *src, uint16_t len);
 uint16_t fifo_pop_bytes(FIFO *p_fifo, fifo_buffer_type *dest, uint16_t len);
