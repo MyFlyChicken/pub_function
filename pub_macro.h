@@ -104,4 +104,6 @@
         (field)[2] = (uint8_t)((value) >> 8);  \
         (field)[3] = (uint8_t)((value) >> 0);  \
     } while (0)
+
+
 #endif/* __PUB_MACRO_H__ */
