@@ -26,6 +26,7 @@ void mulit_menu_main(mulit_menu_t *p_mulit_menu)
             p_mulit_menu->last_depth = p_mulit_menu->curr_depth;
         }        
     }
-    p_mulit_menu->menu[p_mulit_menu->last_depth](p_mulit_menu->args[p_mulit_menu->last_depth][0], p_mulit_menu->args[p_mulit_menu->last_depth][1], 
-                                                 p_mulit_menu->args[p_mulit_menu->last_depth][2], p_mulit_menu->args[p_mulit_menu->last_depth][3]);
+    p_mulit_menu->menu[p_mulit_menu->last_depth](p_mulit_menu, p_mulit_menu->args[p_mulit_menu->last_depth][0], 
+                                                               p_mulit_menu->args[p_mulit_menu->last_depth][1], 
+                                                               p_mulit_menu->args[p_mulit_menu->last_depth][2]);
 }

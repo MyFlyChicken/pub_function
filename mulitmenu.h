@@ -5,7 +5,7 @@
 #include <stdint.h>
 
 
-typedef int (* menu_func)(void *argv1, void *argv2, void *argv3, void *argv4);
+typedef int (* menu_func)(mulit_menu_t *p_menu, void *argv1, void *argv2, void *argv3);
 
 #define MENU_DEPTH 5
 typedef struct 
@@ -15,7 +15,7 @@ typedef struct
     unsigned char change_flag;/* 切换标志, 1可以切换 0不可以切换 */
     //void * lock;             /* 用户执行菜单根据lock判断是否可以执行当前深度任务 */
     //void * psd;              /* 用户密码 */
-    void * args[MENU_DEPTH][4];/* 参数 */
+    void * args[MENU_DEPTH][3];/* 参数 */
     menu_func menu[MENU_DEPTH];
 }mulit_menu_t;
 
