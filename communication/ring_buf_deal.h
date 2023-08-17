@@ -39,7 +39,7 @@ typedef struct
     func_fsm_end     fsm_end;/* 取帧结束执行函数 */
 }ring_buf_deal_t;
 
-
+void ring_buf_deal_main(ring_buf_deal_t *p_ring_buf_deal, unsigned char data);
 
 #ifdef __cplusplus
 }

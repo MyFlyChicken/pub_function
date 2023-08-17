@@ -11,6 +11,7 @@ extern "C"
 #define ASSERT(x)   if (!(x))   \
                     {           \
                         LOG_PRINT("Assert failed, %s, %s", __FILE__, __LINE__); \
+                        while (1);\
                     }
 
 #define KEY_DETECTION_ADC (0U)
