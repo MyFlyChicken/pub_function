@@ -105,5 +105,35 @@
         (field)[3] = (uint8_t)((value) >> 0);  \
     } while (0)
 
+/**
+ * ************************************************************************
+ * @brief 参数校验
+ * 
+ * 
+ * ************************************************************************
+ */
+#define ASSET_ARG_UPLIMIT(arg, uplimit) 	\
+	do{	\
+		if(arg >= uplimit){	\
+		}else{				\
+			return ;   \
+		}\
+	}while(0);
+
+#define ASSET_ARG_DOWNLIMIT(arg, downlimit) 	\
+	do{	\
+		if(arg <= downlimit){	\
+		}else{				\
+			return ;   \
+		}\
+	}while(0);    
+
+#define ASSET_ARG_LIMIT(arg, up, down) 	\
+	do{	\
+		if((arg <= down) || (arg >= down)){	\
+		}else{				\
+			return ;   \
+		}\
+	}while(0);  
 
 #endif/* __PUB_MACRO_H__ */
