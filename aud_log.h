@@ -11,6 +11,7 @@
 #ifndef __AUD_LOG_H__
 #define __AUD_LOG_H__
 #include <stdarg.h>
+#include <stdio.h>
 
 #define AUD_LOG_EN       (1U)
 #define AUD_LOG_COLOR_EN (1U)
@@ -18,7 +19,7 @@
 /*****************************************************************/
 /*********************** 进行DEBUG ****************************/
 #if AUD_LOG_EN
-#define AUD_LOG_PRINT rt_kprintf /* 打印接口 */
+#define AUD_LOG_PRINT printf /* 打印接口 */
 #else
 #define AUD_LOG_PRINT(...)
 #endif
@@ -105,7 +106,7 @@ typedef enum
     {                                                                   \
         if (!(n))                                                       \
         {                                                               \
-            AUD_LOG_PRINT("%s, %s, %s\n", __FILE__, __LINE__, n);  \
+            AUD_LOG_PRINT("%s, %d\n", __FILE__, __LINE__);  \
             while (1);                                                  \
         }                                                               \
     }while (0)
