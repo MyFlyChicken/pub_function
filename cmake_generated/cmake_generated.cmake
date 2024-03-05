@@ -15,8 +15,8 @@ set(sources_SRCS ${sources_SRCS}
 # Include directories
 set(include_c_DIRS ${include_c_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo
-    ${CMAKE_CURRENT_SOURCE_DIR}/func
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/
+    ${CMAKE_CURRENT_SOURCE_DIR}/func/
 )
 set(include_cxx_DIRS ${include_cxx_DIRS}{{sr:include_cxx_DIRS}})
 set(include_asm_DIRS ${include_asm_DIRS}{{sr:include_asm_DIRS}})

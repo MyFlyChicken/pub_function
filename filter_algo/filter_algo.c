@@ -1,6 +1,5 @@
 /* ----------------------- System includes ----------------------------------*/
-#include <stdint.h>
-#include <stdlib.h>
+
 /* ----------------------- Platform includes --------------------------------*/
 #include "filter_algo.h"
 
@@ -52,6 +51,8 @@ uint16_t filter1(void)
     static uint16_t value = 0;
     uint16_t value_new;
 
+    ALGO_ASSERT(_filter_inf.get_currval);
+
     value_new = *(uint16_t *)_filter_inf.get_currval(1); // 获取采样值
     if( abs(value_new - value) > DELT_VAL)   
         return value;     // abs()取绝对值函数
@@ -83,6 +84,7 @@ uint16_t filter2(uint16_t num)
     uint16_t* value_buf;
     uint16_t i, j, temp;
 
+    ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 1);
 
     value_buf = (uint16_t *)_filter_inf.get_currval(num);
@@ -126,6 +128,7 @@ uint16_t filter3(uint16_t num)
     uint16_t* value_buf;
     uint32_t  tmp;//避免越界
 
+    ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
     value_buf = (uint16_t *)_filter_inf.get_currval(num);
@@ -173,6 +176,7 @@ uint16_t filter4(uint16_t num)
 
     uint16_t tmp;
 
+    ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
     if(cnt < num)
@@ -220,6 +224,7 @@ uint16_t filter5(uint16_t num)
     uint16_t tmp;
     uint32_t sum = 0;
 
+    ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
     value_buf = (uint16_t *)_filter_inf.get_currval(num);
@@ -272,6 +277,7 @@ uint16_t filter5(uint16_t num)
  */
 uint16_t filter6(uint16_t prev_value, uint16_t curr_value, uint16_t ratio)
 {
+    ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(ratio <= 100);
 
     return ((100-ratio)*prev_value + ratio*curr_value);
@@ -317,6 +323,7 @@ uint16_t filter8(uint16_t *weights, uint16_t weights_num, uint16_t sa_num)
     uint16_t i;  
     uint16_t* value_buf;
 
+    ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(weights_num==sa_num);
     ALGO_ASSERT(sa_num > 2);
 
@@ -331,4 +338,11 @@ uint16_t filter8(uint16_t *weights, uint16_t weights_num, uint16_t sa_num)
     }
 
     return  (uint16_t)(sum/100);
+}
+
+int16_t filter_inf_register(void *(*get_currval)(unsigned char num))
+{
+    ALGO_ASSERT(get_currval);
+    
+    _filter_inf.get_currval = get_currval;
 }
