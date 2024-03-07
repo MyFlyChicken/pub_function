@@ -16,12 +16,14 @@
 
 #include "public.h"
 #include <stdio.h>
+#include "test/test.h"
 
 
 
 int main()
 {
     
+    test_main();
     printf("Hello word!");
 
     return 0;

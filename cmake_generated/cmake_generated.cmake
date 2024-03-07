@@ -9,15 +9,18 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/filter_algo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
-
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
 )
-
+message(${CMAKE_CURRENT_SOURCE_DIR})
 # Include directories
 set(include_c_DIRS ${include_c_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/
-    ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/
-    ${CMAKE_CURRENT_SOURCE_DIR}/func/
+    ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo
+    ${CMAKE_CURRENT_SOURCE_DIR}/func
+    ${CMAKE_CURRENT_SOURCE_DIR}/test
+    ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src
+    ${CMAKE_CURRENT_SOURCE_DIR}
 )
+message(${include_c_DIRS})
 set(include_cxx_DIRS ${include_cxx_DIRS}{{sr:include_cxx_DIRS}})
 set(include_asm_DIRS ${include_asm_DIRS}{{sr:include_asm_DIRS}})
 

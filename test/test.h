@@ -20,7 +20,9 @@
 extern "C" {
 #endif
 
-#include "filter_algo.h"
+#define  UNITY_INCLUDE_CONFIG_H
+#include "../UnityTesting/src/unity.h"
+#include "../filter_algo/filter_algo.h"
 
 
 /* ----------------------- Defines ------------------------------------------*/
@@ -32,7 +34,7 @@ extern "C" {
 
 
 /* ----------------------- Extern variable ---------------------------------*/
-
+void test_main(void);
 
 
 /* ----------------------- Extern function ----------------------------------*/
