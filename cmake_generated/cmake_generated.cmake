@@ -10,7 +10,9 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/filter_algo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
 )
+
 message(${CMAKE_CURRENT_SOURCE_DIR})
 # Include directories
 set(include_c_DIRS ${include_c_DIRS}

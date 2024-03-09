@@ -62,6 +62,12 @@ add_executable(${CMAKE_PROJECT_NAME})
 
 # Add sources to executable
 target_sources(${CMAKE_PROJECT_NAME} PUBLIC ${sources_SRCS})
+message(>>1<<)
+message(${sources_SRCS})
+message(>>2<<)
+message(${include_c_DIRS})
+
+
 
 # Add include paths
 target_include_directories(${CMAKE_PROJECT_NAME} PRIVATE
@@ -109,7 +115,7 @@ target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE
 
 # Linker options
 target_link_options(${CMAKE_PROJECT_NAME} PRIVATE
-    #-Wl,#-Map=${CMAKE_PROJECT_NAME}.map
+    -Wl,-Map=${CMAKE_PROJECT_NAME}.map
     #-u _printf_float # STDIO float formatting support (remove if not used)
     #-Wl,--start-group
     -lstdc++
