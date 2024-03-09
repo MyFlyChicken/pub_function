@@ -18,6 +18,7 @@ set(include_c_DIRS ${include_c_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/func
     ${CMAKE_CURRENT_SOURCE_DIR}/test
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/examples
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 message(${include_c_DIRS})
