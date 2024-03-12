@@ -24,7 +24,6 @@ int main()
 {
     
     test_main();
-    printf("Hello word!");
 
     return 0;
 }

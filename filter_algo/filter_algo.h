@@ -20,6 +20,15 @@ extern "C" {
 
 
 /* ----------------------- Extern function ----------------------------------*/
+int16_t filter1(void);
+int16_t filter2(int16_t num);
+int16_t filter3(int16_t num);
+int16_t filter4(int16_t num);
+int16_t filter5(int16_t num);
+int16_t filter6(int16_t prev_value, int16_t curr_value, int16_t ratio);
+int16_t filter7(int16_t prev_value, uint8_t ratio1, uint8_t ratio2);
+int16_t filter8(int16_t *weights, int16_t weights_num, int16_t sa_num);
+
 int16_t filter_inf_register(void *(*get_currval)(unsigned char num));
 
 

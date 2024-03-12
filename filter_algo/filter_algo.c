@@ -7,22 +7,20 @@
 
 /* ----------------------- Defines ------------------------------------------*/
 #ifndef NULL
-#define  NULL 0
+#define NULL 0
 #endif
 
-#define  ALGO_ASSERT(x) AUD_ASSERT(x)
+#define ALGO_ASSERT(x) AUD_ASSERT(x)
 
 /* ----------------------- Type definitions ---------------------------------*/
-typedef struct{
-    void *(*get_currval)(unsigned char num);
-}filter_inf_t;
+typedef struct
+{
+    void* (*get_currval)(unsigned char num);
+} filter_inf_t;
 /* ----------------------- Static variables ---------------------------------*/
 filter_inf_t _filter_inf;
 
-
 /* ----------------------- Static function ----------------------------------*/
-
-
 
 /* ----------------------- Start implementation -----------------------------*/
 /**
@@ -44,18 +42,18 @@ filter_inf_t _filter_inf;
  * 
  * @details 
  */
-uint16_t filter1(void)
+int16_t filter1(void)
 {
-    /* A值根据实际调，value有效值，value_new当前采样值，程序返回有效的实际值 */
-    #define DELT_VAL 10
-    static uint16_t value = 0;
-    uint16_t value_new;
+/* A值根据实际调，value有效值，value_new当前采样值，程序返回有效的实际值 */
+#define DELT_VAL 10
+    static int16_t value = 0;
+    int16_t        value_new;
 
     ALGO_ASSERT(_filter_inf.get_currval);
 
-    value_new = *(uint16_t *)_filter_inf.get_currval(1); // 获取采样值
-    if( abs(value_new - value) > DELT_VAL)   
-        return value;     // abs()取绝对值函数
+    value_new = *(int16_t*)_filter_inf.get_currval(1); // 获取采样值
+    if (abs(value_new - value) > DELT_VAL)
+        return value; // abs()取绝对值函数
 
     value = value_new;
     return value_new;
@@ -64,43 +62,47 @@ uint16_t filter1(void)
 /**
  * @brief 中位值滤波法
  *        1、方法：
- *
  *        连续采样N次（N取奇数），把N次采样值按大小排列
  *        取中间值为本次有效值
- *        2、优点：
  *
+ *        2、优点：
  *        能有效克服因偶然因素引起的波动干扰
  *        对温度、液位的变化缓慢的被测参数有良好的滤波效果
- *        3、缺点：
  *
+ *        3、缺点：
  *        对流量、速度等快速变化的参数不宜
+ *
  * @param [in] num 设置一次读取原始数据的数量，num必须大于1
- * @return uint16_t 
+ * @return int16_t 返回中间值
  * 
  * @details 
  */
-uint16_t filter2(uint16_t num)
+int16_t filter2(int16_t num)
 {
-    uint16_t* value_buf;
-    uint16_t i, j, temp;
+    int16_t* value_buf;
+    int16_t  i, j, temp;
 
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 1);
 
-    value_buf = (uint16_t *)_filter_inf.get_currval(num);
-    for(j = 0; j < (num-1); j++)
+    value_buf = (int16_t*)_filter_inf.get_currval(num);
+    for (j = 0; j < (num - 1); j++)
     {
-        for(i = 0; i < (num-j); i++)
+        for (i = 0; i < (num - j - 1); i++)
         {
-            if(value_buf[i] > value_buf[i+1])
+            if (value_buf[i] > value_buf[i + 1])
             {
-                temp = value_buf[i];
-                value_buf[i] = value_buf[i+1];
-                value_buf[i+1] = temp;
+                temp             = value_buf[i];
+                value_buf[i]     = value_buf[i + 1];
+                value_buf[i + 1] = temp;
             }
         }
     }
-    return value_buf[(num-1)/2];
+    // for (i = 0; i < num; i++)
+    // {
+    //     printf("%d\r\n", value_buf[i]);
+    // }
+    return value_buf[(num - 1) / 2];
 }
 
 /**
@@ -119,28 +121,30 @@ uint16_t filter2(uint16_t num)
  *       对于测量速度较慢或要求数据计算速度较快的实时控制不适用
  *       比较浪费RAM
  * @param [in] num 设置一次读取原始数据的数量，num必须大于2
- * @return uint16_t 
+ * @return int16_t 
  * 
  * @details 
  */
-uint16_t filter3(uint16_t num)
+int16_t filter3(int16_t num)
 {
-    uint16_t* value_buf;
-    uint32_t  tmp;//避免越界
-
+    int16_t* value_buf;
+    int32_t  tmp; //避免越界
+    int32_t  remainder = 0;
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
-    value_buf = (uint16_t *)_filter_inf.get_currval(num);
+    value_buf = (int16_t*)_filter_inf.get_currval(num);
 
-    tmp = (value_buf[num - 1] + value_buf[num - 2])>>1;//右移比出发快
-    num -= 2;
-
-    while (num--) {
-        tmp = tmp + value_buf[num - 1];
-        tmp >>= 1;
+    tmp        = (value_buf[num - 1] + value_buf[num - 2]) >> 1; //右移比除法快，但是会引入除不尽的误差
+    num       -= 2;
+    remainder += ((tmp % 2) ? 1 : 0);
+    while (num--)
+    {
+        tmp         = tmp + value_buf[num];
+        remainder  += ((tmp % 2) ? 1 : 0); //避免误差
+        tmp       >>= 1;
     }
-
+    tmp += (remainder * 0.5);
     return tmp;
 }
 
@@ -165,34 +169,34 @@ uint16_t filter3(uint16_t num)
  *        比较浪费RAM
  *        
  * @param [in] num 设置计算平均值的数据个数，num必须大于2
- * @return uint16_t 
+ * @return int16_t 
  * 
  * @details 
  */
-uint16_t filter4(uint16_t num)
+int16_t filter4(int16_t num)
 {
-    static uint16_t cnt = 0;
-    static uint32_t sum = 0;
+    static int16_t cnt = 0;
+    static int32_t sum = 0;
 
-    uint16_t tmp;
+    int16_t tmp;
 
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
-    if(cnt < num)
+    if (cnt < num)
     {
-        tmp= *(uint16_t *)_filter_inf.get_currval(1);
+        tmp  = *(int16_t*)_filter_inf.get_currval(1);
         sum += tmp;
         cnt++;
 
-        return sum/cnt;
+        return sum / cnt;
     }
     else
     {
         sum -= (sum / cnt);
-        sum += *(uint16_t *)_filter_inf.get_currval(1);
+        sum += *(int16_t*)_filter_inf.get_currval(1);
 
-        return sum/num;
+        return sum / num;
     }
 }
 
@@ -213,44 +217,48 @@ uint16_t filter4(uint16_t num)
  *        比较浪费RAM
 
  * @param [in] num 设置一次读取原始数据的数量，num必须大于2
- * @return uint16_t 
+ * @return int16_t 
  * 
  * @details 
  */
-uint16_t filter5(uint16_t num)
+int16_t filter5(int16_t num)
 {
-    unsigned char count, i, j;
-    uint16_t * value_buf;
-    uint16_t tmp;
-    uint32_t sum = 0;
+    uint8_t  count, i, j;
+    int16_t* value_buf;
+    int32_t  tmp       = 0;
+    int32_t  remainder = 0;
 
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
-    value_buf = (uint16_t *)_filter_inf.get_currval(num);
-    
-    for(j = 0; j < (num-1); j++)
+    value_buf = (int16_t*)_filter_inf.get_currval(num);
+
+    for (j = 0; j < (num - 1); j++)
     {
-        for(i = 0; i < (num-j); i++)
+        for (i = 0; i < (num - j - 1); i++)
         {
-            if(value_buf[i] > value_buf[i+1])
+            if (value_buf[i] > value_buf[i + 1])
             {
-                tmp = value_buf[i];
-                value_buf[i] = value_buf[i+1];
-                value_buf[i+1] = tmp;
+                tmp              = value_buf[i];
+                value_buf[i]     = value_buf[i + 1];
+                value_buf[i + 1] = tmp;
             }
-        }  
+        }
     }
 
-    sum += value_buf[1];
+    tmp  = 0;
+    tmp += value_buf[1];
 
-    for(count = 2; count < num-1; count ++)
+    for (count = 2; count < num - 1; count++)
     {
-        sum += value_buf[count];
-        sum >>= 1;
+        tmp        += value_buf[count];
+        remainder  += ((tmp % 2) ? 1 : 0);
+        tmp       >>= 1;
     }
 
-    return (uint16_t)(sum);
+    tmp += (remainder * 0.5);
+
+    return (int16_t)(tmp);
 }
 
 /**
@@ -271,26 +279,26 @@ uint16_t filter5(uint16_t num)
  * @param [in] prev_value 上一次采样值
  * @param [in] curr_value 当前采样值
  * @param [in] ratio 滞后程度取决于ratio值大小，取值（0~100）
- * @return uint16_t 
+ * @return int16_t 
  * 
  * @details 
  */
-uint16_t filter6(uint16_t prev_value, uint16_t curr_value, uint16_t ratio)
+int16_t filter6(int16_t prev_value, int16_t curr_value, int16_t ratio)
 {
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(ratio <= 100);
 
-    return ((100-ratio)*prev_value + ratio*curr_value);
+    return ((100 - ratio) * prev_value + ratio * curr_value);
 }
 
 /**
  * @brief 二阶滞后滤波算法
  *        
- * @return uint16_t 
+ * @return int16_t 
  * 
  * @details 
  */
-uint16_t filter7(uint16_t prev_value, uint8_t ratio1, uint8_t ratio2)
+int16_t filter7(int16_t prev_value, uint8_t ratio1, uint8_t ratio2)
 {
     return 0;
 }
@@ -313,36 +321,39 @@ uint16_t filter7(uint16_t prev_value, uint8_t ratio1, uint8_t ratio2)
  * @param [in] weights 权重原始数据，数据应为0~100，实际为0.00~1.00，扩大了100倍方便计算
  * @param [in] weights_num 权重个数
  * @param [in] sa_num 采样数，取值（>2）
- * @return uint16_t 
+ * @return int16_t 
  * 
  * @details 
  */
-uint16_t filter8(uint16_t *weights, uint16_t weights_num, uint16_t sa_num)
+int16_t filter8(int16_t* weights, int16_t weights_num, int16_t sa_num)
 {
-    uint32_t sum = 0;
-    uint16_t i;  
-    uint16_t* value_buf;
+    int32_t  sum = 0;
+    int16_t  i;
+    int16_t* value_buf;
 
     ALGO_ASSERT(_filter_inf.get_currval);
-    ALGO_ASSERT(weights_num==sa_num);
+    ALGO_ASSERT(weights_num == sa_num);
     ALGO_ASSERT(sa_num > 2);
 
-    value_buf = (uint16_t *)_filter_inf.get_currval(sa_num);
+    value_buf = (int16_t*)_filter_inf.get_currval(sa_num);
 
     // 计算加权平均值
-    i = 0;
+    i    = 0;
     sum += value_buf[i] * weights[i];
-    while (--sa_num) {
-        sum += value_buf[i] * weights[i];
+    while (--sa_num)
+    {
+        sum  += value_buf[i] * weights[i];
         sum >>= 1;
     }
 
-    return  (uint16_t)(sum/100);
+    return (int16_t)(sum / 100);
 }
 
-int16_t filter_inf_register(void *(*get_currval)(unsigned char num))
+int16_t filter_inf_register(void* (*get_currval)(unsigned char num))
 {
     ALGO_ASSERT(get_currval);
-    
+
     _filter_inf.get_currval = get_currval;
+
+    return 0;
 }
