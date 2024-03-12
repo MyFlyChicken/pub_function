@@ -72,12 +72,33 @@ void tearDown(void)
     return;
 }
 
+/*=======Test Runner Used To Run Each Test Below=====*/
+#define RUN_TEST(TestFunc, TestLineNum) \
+{ \
+  Unity.CurrentTestName = #TestFunc; \
+  Unity.CurrentTestLineNumber = TestLineNum; \
+  Unity.NumberOfTests++; \
+  if (TEST_PROTECT()) \
+  { \
+      setUp(); \
+      TestFunc(); \
+  } \
+  if (TEST_PROTECT()) \
+  { \
+    tearDown(); \
+  } \
+  UnityConcludeTest(); \
+}
+
+void test_func1(void)
+{
+    TEST_ASSERT_GREATER_THAN(100, 1000);
+    TEST_ASSERT_GREATER_THAN(10, 100);
+}
 
 void test_main(void)
 {
-    setUp();
-    TEST_ASSERT_GREATER_THAN(1, 10);
-    TEST_ASSERT_GREATER_THAN(10, 1);
+    UnityBegin("test/test.c");
+    RUN_TEST(test_func1, 93);
     printf("<<<123>>>\n");
-    tearDown();
 }
