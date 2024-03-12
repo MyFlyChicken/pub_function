@@ -128,24 +128,19 @@ int16_t filter2(int16_t num)
 int16_t filter3(int16_t num)
 {
     int16_t* value_buf;
-    int32_t  tmp; //避免越界
-    int32_t  remainder = 0;
+    double   average; //避免越界
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
     value_buf = (int16_t*)_filter_inf.get_currval(num);
 
-    tmp        = (value_buf[num - 1] + value_buf[num - 2]) >> 1; //右移比除法快，但是会引入除不尽的误差
-    num       -= 2;
-    remainder += ((tmp % 2) ? 1 : 0);
-    while (num--)
+    average = value_buf[0];
+    for (int i = 1; i < num; i++)
     {
-        tmp         = tmp + value_buf[num];
-        remainder  += ((tmp % 2) ? 1 : 0); //避免误差
-        tmp       >>= 1;
+        average = average + (value_buf[i] - average) / (i + 1);
     }
-    tmp += (remainder * 0.5);
-    return tmp;
+
+    return (int16_t)average;
 }
 
 /**
@@ -223,11 +218,10 @@ int16_t filter4(int16_t num)
  */
 int16_t filter5(int16_t num)
 {
-    uint8_t  count, i, j;
+    uint8_t  i, j;
     int16_t* value_buf;
-    int32_t  tmp       = 0;
-    int32_t  remainder = 0;
-
+    int32_t  tmp = 0;
+    double   average;
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
@@ -246,19 +240,14 @@ int16_t filter5(int16_t num)
         }
     }
 
-    tmp  = 0;
-    tmp += value_buf[1];
-
-    for (count = 2; count < num - 1; count++)
+    average = value_buf[1];
+    for (i = 2; i < num - 1; i++)
     {
-        tmp        += value_buf[count];
-        remainder  += ((tmp % 2) ? 1 : 0);
-        tmp       >>= 1;
+        printf("%f\r\n", average);
+        average = average + (value_buf[i] - average) / (i + 1);
     }
 
-    tmp += (remainder * 0.5);
-
-    return (int16_t)(tmp);
+    return (int16_t)(average);
 }
 
 /**
