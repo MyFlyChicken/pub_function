@@ -28,7 +28,7 @@ AlignTrailingComments: true
 AllowAllParametersOfDeclarationOnNextLine: false
 
 # 不允许短的块放在同一行
-AllowShortBlocksOnASingleLine: false
+AllowShortBlocksOnASingleLine: true
 
 # 允许短的case标签放在同一行
 AllowShortCaseLabelsOnASingleLine: false
@@ -118,10 +118,10 @@ AlwaysBreakBeforeMultilineStrings: false
 AlwaysBreakTemplateDeclarations: true
 
 # false表示函数实参要么都在同一行，要么都各自一行
-BinPackArguments: true
+BinPackArguments: false
 
 # false表示所有形参要么都在同一行，要么都各自一行
-BinPackParameters: true
+BinPackParameters: false
 
 # 在二元运算符前换行: None(在操作符后换行), NonAssignment(在非赋值的操作符前换行), All(在操作符前换行)
 BreakBeforeBinaryOperators: NonAssignment
