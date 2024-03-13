@@ -4,6 +4,7 @@
 #include "filter_algo.h"
 
 #include "../aud_log.h"
+#include <stdint.h>
 
 /* ----------------------- Defines ------------------------------------------*/
 #ifndef NULL
@@ -13,6 +14,14 @@
 #define ALGO_ASSERT(x) AUD_ASSERT(x)
 
 /* ----------------------- Type definitions ---------------------------------*/
+typedef struct
+{
+    int16_t data[MOVING_AVERAGE_FILTER_SIZE];
+    int16_t count; // 记录已填充的数据个数
+    int16_t index;
+    int16_t sum;
+} moving_average_filter;
+
 typedef struct
 {
     void* (*get_currval)(unsigned char num);
@@ -84,7 +93,7 @@ int16_t filter2(int16_t num)
 
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 1);
-
+    //TODO 直接修改原始数据合理么？
     value_buf = (int16_t*)_filter_inf.get_currval(num);
     for (j = 0; j < (num - 1); j++)
     {
@@ -128,7 +137,7 @@ int16_t filter2(int16_t num)
 int16_t filter3(int16_t num)
 {
     int16_t* value_buf;
-    double   average; //避免越界
+    float    average; //避免越界
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
@@ -145,6 +154,10 @@ int16_t filter3(int16_t num)
 
 /**
  * @brief 递推平均滤波法
+ * @param [in] num 设置计算平均值的数据个数，num必须大于2
+ * @return int16_t 
+ * 
+ * @details 
  *        1、方法：
  *        把连续取N个采样值看成一个队列
  *        队列的长度固定为N
@@ -162,37 +175,28 @@ int16_t filter3(int16_t num)
  *        不易消除由于脉冲干扰所引起的采样值偏差
  *        不适用于脉冲干扰比较严重的场合
  *        比较浪费RAM
- *        
- * @param [in] num 设置计算平均值的数据个数，num必须大于2
- * @return int16_t 
- * 
- * @details 
+ *        注意，前MOVING_AVERAGE_FILTER_SIZE计算会有误差，可以直接省略
  */
-int16_t filter4(int16_t num)
+int16_t filter4(void)
 {
-    static int16_t cnt = 0;
-    static int32_t sum = 0;
-
-    int16_t tmp;
+    static moving_average_filter move_filt = {0};
+    int16_t                      new_value;
 
     ALGO_ASSERT(_filter_inf.get_currval);
-    ALGO_ASSERT(num > 2);
 
-    if (cnt < num)
-    {
-        tmp  = *(int16_t*)_filter_inf.get_currval(1);
-        sum += tmp;
-        cnt++;
+    new_value = *(int16_t*)_filter_inf.get_currval(1);
+    // 移出旧值
+    move_filt.sum -= move_filt.data[move_filt.index];
 
-        return sum / cnt;
-    }
-    else
-    {
-        sum -= (sum / cnt);
-        sum += *(int16_t*)_filter_inf.get_currval(1);
+    // 添加新值
+    move_filt.data[move_filt.index]  = new_value;
+    move_filt.sum                   += new_value;
 
-        return sum / num;
-    }
+    // 更新索引（循环使用队列）
+    move_filt.index = (move_filt.index + 1) % MOVING_AVERAGE_FILTER_SIZE;
+
+    // 返回当前平均值
+    return move_filt.sum / MOVING_AVERAGE_FILTER_SIZE;
 }
 
 /**
@@ -221,12 +225,13 @@ int16_t filter5(int16_t num)
     uint8_t  i, j;
     int16_t* value_buf;
     int32_t  tmp = 0;
-    double   average;
+    float    average;
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(num > 2);
 
     value_buf = (int16_t*)_filter_inf.get_currval(num);
 
+    //TODO 直接修改原始数据合理么？
     for (j = 0; j < (num - 1); j++)
     {
         for (i = 0; i < (num - j - 1); i++)
@@ -243,7 +248,7 @@ int16_t filter5(int16_t num)
     average = value_buf[1];
     for (i = 2; i < num - 1; i++)
     {
-        printf("%f\r\n", average);
+        //printf("%f\r\n", average);
         average = average + (value_buf[i] - average) / (i + 1);
     }
 
@@ -277,7 +282,7 @@ int16_t filter6(int16_t prev_value, int16_t curr_value, int16_t ratio)
     ALGO_ASSERT(_filter_inf.get_currval);
     ALGO_ASSERT(ratio <= 100);
 
-    return ((100 - ratio) * prev_value + ratio * curr_value);
+    return ((100 - ratio) * prev_value + ratio * curr_value) / 100;
 }
 
 /**

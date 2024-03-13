@@ -7,12 +7,11 @@ extern "C" {
 
 #include <stdint.h>
 #include <stdlib.h>
+
 /* ----------------------- Defines ------------------------------------------*/
-
-
+#define MOVING_AVERAGE_FILTER_SIZE (5U)  // 设定滤波窗口大小
 
 /* ----------------------- Type definitions ---------------------------------*/
-
 
 
 /* ----------------------- Extern variable ---------------------------------*/
@@ -23,7 +22,7 @@ extern "C" {
 int16_t filter1(void);
 int16_t filter2(int16_t num);
 int16_t filter3(int16_t num);
-int16_t filter4(int16_t num);
+int16_t filter4(void);
 int16_t filter5(int16_t num);
 int16_t filter6(int16_t prev_value, int16_t curr_value, int16_t ratio);
 int16_t filter7(int16_t prev_value, uint8_t ratio1, uint8_t ratio2);

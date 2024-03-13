@@ -15,6 +15,7 @@
  */
 /* ----------------------- System includes ----------------------------------*/
 #include "test.h"
+#include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -25,21 +26,22 @@
 /* ----------------------- Type definitions ---------------------------------*/
 
 /* ----------------------- Static variables ---------------------------------*/
-
+static uint16_t bufindex = 0;
 /* ----------------------- Static function ----------------------------------*/
 
 /* ----------------------- Start implementation -----------------------------*/
 static void* _filter_get_value(unsigned char num)
 {
-    static int16_t buffer[] = {
-        //1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-        10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
+    static int16_t buffer[] = {//1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+                               10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
-    return &buffer[0];
+    bufindex = (bufindex + 1) % (sizeof(buffer) / sizeof(int16_t));
+    return &buffer[bufindex];
 }
 
 void setUp(void)
 {
+    bufindex = 0;
     filter_inf_register(_filter_get_value);
 }
 
@@ -49,21 +51,21 @@ void tearDown(void)
 }
 
 /*=======Test Runner Used To Run Each Test Below=====*/
-#define RUN_TEST(TestFunc, TestLineNum)            \
-    {                                              \
-        Unity.CurrentTestName       = #TestFunc;   \
-        Unity.CurrentTestLineNumber = TestLineNum; \
-        Unity.NumberOfTests++;                     \
-        if (TEST_PROTECT())                        \
-        {                                          \
-            setUp();                               \
-            TestFunc();                            \
-        }                                          \
-        if (TEST_PROTECT())                        \
-        {                                          \
-            tearDown();                            \
-        }                                          \
-        UnityConcludeTest();                       \
+#define RUN_TEST(TestFunc, TestLineNum)                                        \
+    {                                                                          \
+        Unity.CurrentTestName       = #TestFunc;                               \
+        Unity.CurrentTestLineNumber = TestLineNum;                             \
+        Unity.NumberOfTests++;                                                 \
+        if (TEST_PROTECT())                                                    \
+        {                                                                      \
+            setUp();                                                           \
+            TestFunc();                                                        \
+        }                                                                      \
+        if (TEST_PROTECT())                                                    \
+        {                                                                      \
+            tearDown();                                                        \
+        }                                                                      \
+        UnityConcludeTest();                                                   \
     }
 
 void test_filter1(void)
@@ -88,6 +90,18 @@ void test_filter3(void)
     TEST_ASSERT_UINT16_WITHIN(1, 5, tmp);
 }
 
+void test_filter4(void)
+{
+    int16_t tmp;
+    for (int16_t i = 0; i < 10; i++)
+    {
+        tmp = filter4();
+        printf("raw dat:%d\r\n", tmp);
+    }
+
+    TEST_ASSERT_UINT16_WITHIN(1, 5, tmp);
+}
+
 void test_filter5(void)
 {
     int16_t tmp;
@@ -101,5 +115,6 @@ void test_main(void)
     RUN_TEST(test_filter1, 80);
     RUN_TEST(test_filter2, 88);
     RUN_TEST(test_filter3, 95);
-    RUN_TEST(test_filter5, 90);
+    RUN_TEST(test_filter4, 90);
+    RUN_TEST(test_filter5, 97);
 }
