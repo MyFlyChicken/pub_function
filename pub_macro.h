@@ -32,6 +32,12 @@
 #define CONV2UINT32_P(val)    ((uint32_t *)(val))
 
 /**
+ * @brief 转换数字到布尔类型
+ * 
+ */
+ #define VALUE2BOOL(x) (!!x)
+
+/**
  * @brief 简易数学计算
  * 
  */
@@ -73,6 +79,7 @@
 #ifndef BSWAP32
 #define BSWAP32(u32) (__builtin_bswap32(u32))
 #endif
+
 
 /**
  * @brief 数据拼接，field为指针
