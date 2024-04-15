@@ -15,9 +15,7 @@
 #define EB_ASSERT(x)  
 #endif
 
-#define EB_FRAME_ADDR_START   (0)
-#define EB_FRAME_ADDR_END     (4096U)
-#define EB_FRAME_NEXT_DEFAULT (0xFFFFFFFF)
+
 
 /* 不要随意调换顺序，带有wr前缀的成员，表明该成员是需要写入flash内部的 */
 typedef struct 
