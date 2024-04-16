@@ -63,6 +63,14 @@ extern "C"
     }
 #endif /* EB_ASSERT_EN */
 
+#define EB_FRAME_OFFSET_DEFAULT (0xFFFFFFFF)
+#define EB_FRAME_BYTES_DEFAULT  (0xFFFFFFFF)
+
+#define EB_MEMCOPY memcpy
+#define EB_MEMSET  memset
+
+#define EB_CRC_INITVAL (0xFFFF)
+
     typedef enum
     {
         EB_NO_ERR = 0,
@@ -71,6 +79,7 @@ extern "C"
         EB_WRITE_ERR,
         EB_NAME_NOT_FOUND,
         EB_CRC_ERR,
+        EB_INVALID_FRAME,
         EB_INIT_FAILED,
     } eb_err_t;
 
@@ -109,9 +118,9 @@ extern "C"
 #pragma pack(4)
     typedef struct
     {
-        eb_frame_t* next;  /* 下一个数据区，实际为数据区的地址 */
-        uint32_t    bytes; /* 用户赋值的数据 */
-        uint16_t    crc16; /* 缓存数据 */
+        uint32_t offset; /*!< 当前帧在flash中的位置 */
+        uint32_t bytes;  /*!< 用户赋值的数据 */
+        uint16_t crc16;  /*!< 数据的crc16结果 */
     } eb_frame_t;
 #pragma pack()
     /**

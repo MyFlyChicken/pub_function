@@ -28,9 +28,8 @@ extern "C"
     /** @defgroup eb
   * @{
   */
-    eb_err_t eb_init(void);
-    eb_err_t eb_header_check(uint32_t* cnt);
-    char*    eb_get_data(eb_frame_t* p_frame);
+
+  
     /**
   *@}
   */

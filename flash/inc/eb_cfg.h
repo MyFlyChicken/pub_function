@@ -37,8 +37,6 @@ extern "C"
 #define EB_NAME           ("EB_BALANCE") /*!< 匹配名字 */
 #define EB_NAME_MAX_BYTES (16)           /*!< EB_NAME最大字节 */
 
-#define EB_MEMCOPY memcpy
-#define EB_MEMSET  memset
     /**
   *@}
   */

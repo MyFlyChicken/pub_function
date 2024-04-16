@@ -23,6 +23,7 @@
 #include "inc/eb_def.h"
 #include <cstdint>
 #include <cstring>
+#include <stdint.h>
 
 eb_port_t   _eb_port;
 eb_frame_t  _eb_frame;
@@ -43,8 +44,8 @@ static eb_err_t _eb_loading(void)
     ret = _eb_port.read(0, (uint8_t*)&header, sizeof(eb_header_t));
     if (ret)
     {
-        EB_DEBUG("read flash failed %d", ret);
-        return EB_WRITE_ERR;
+        EB_DEBUG("read flash header failed %d", ret);
+        return EB_READ_ERR;
     }
 
     if (strcmp(header.name, EB_NAME))
@@ -53,7 +54,26 @@ static eb_err_t _eb_loading(void)
         return EB_NAME_NOT_FOUND;
     }
 
+    do
+    {
+        ret = _eb_port.read(_eb_frame.offset, (uint8_t*)&_eb_frame, sizeof(eb_frame_t));
+        if (ret)
+        {
+            EB_DEBUG("read flash frame failed %d", ret);
+            return EB_READ_ERR;
+        }
+    } while (_eb_frame.offset != EB_FRAME_OFFSET_DEFAULT);
+
+    if (EB_FRAME_BYTES_DEFAULT == _eb_frame.bytes)
+    {
+        return EB_INVALID_FRAME;
+    }
+
     return EB_NO_ERR;
+}
+
+static eb_err_t _eb_reset(void)
+{
 }
 
 /**
@@ -86,7 +106,8 @@ eb_err_t eb_init(uint32_t offset, uint32_t bytes)
 
     _eb_header.bytes = bytes;
 
-    _eb_frame.next = NULL;
+    _eb_frame.offset = sizeof(eb_header_t);
+    _eb_frame.bytes  = EB_FRAME_BYTES_DEFAULT;
 
     ret = _eb_port.erase(offset, bytes);
     if (ret)
@@ -105,12 +126,79 @@ eb_err_t eb_init(uint32_t offset, uint32_t bytes)
     return EB_NO_ERR;
 }
 
-char* eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t length)
+eb_err_t eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t len, uint32_t* actual_len)
 {
+    int ret;
+
+    if (EB_FRAME_BYTES_DEFAULT == p_frame->bytes)
+    {
+        return EB_INVALID_FRAME;
+    }
+
+    if (len <= p_frame->bytes)
+    {
+        *actual_len = len;
+    }
+    else
+    {
+        *actual_len = p_frame->bytes;
+    }
+
+    ret = _eb_port.read(p_frame->offset, (uint8_t*)dst, *actual_len);
+    if (ret)
+    {
+        EB_DEBUG("read flash frame failed %d", ret);
+        return EB_READ_ERR;
+    }
+
+    /* 计算CRC */
+    if (p_frame->crc16 != _eb_port.crc16(EB_CRC_INITVAL, (uint8_t*)dst, *actual_len))
+    {
+        return EB_CRC_ERR;
+    }
+
+    return EB_NO_ERR;
 }
 
 char* eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length)
 {
+    int        ret;
+    eb_frame_t tmp;
+
+    if ((p_frame->offset + p_frame->bytes + sizeof(eb_frame_t) + length) > _eb_header.bytes)
+    {
+        //重新初始化eb管理区域
+        ret = _eb_reset();
+        if (ret)
+        {
+            EB_DEBUG("_eb_reset failed %d", ret);
+            return ret;
+        }
+    }
+
+    tmp.offset = p_frame->offset + p_frame->bytes + sizeof(eb_frame_t);
+    tmp.bytes  = length;
+    tmp.crc16  = _eb_port.crc16(EB_CRC_INITVAL, (uint8_t*)src, length);
+
+    ret = _eb_port.write(tmp.offset, (const uint8_t*)&tmp, sizeof(eb_header_t));
+    if (ret)
+    {
+        EB_DEBUG("write flash frame failed %d", ret);
+        return EB_WRITE_ERR;
+    }
+
+    ret = _eb_port.write(tmp.offset + sizeof(eb_header_t), (const uint8_t*)&src, length);
+    if (ret)
+    {
+        EB_DEBUG("write flash data failed %d", ret);
+        return EB_WRITE_ERR;
+    }
+
+    _eb_frame.offset = tmp.offset;
+    _eb_frame.bytes  = tmp.bytes;
+    _eb_frame.crc16  = tmp.crc16;
+
+    return EB_NO_ERR;
 }
 
 /**
