@@ -10,23 +10,23 @@ extern "C"
 #define LOG_PRINT(...)
 
 #if ASSERT_EN
-#define ASSERT(x)                                                              \
-    if (!(x))                                                                  \
-    {                                                                          \
-        LOG_PRINT("Assert failed, %s, %s", __FILE__, __LINE__);                \
-        while (1)                                                              \
-            ;                                                                  \
+#define ASSERT(x)                                               \
+    if (!(x))                                                   \
+    {                                                           \
+        LOG_PRINT("Assert failed, %s, %s", __FILE__, __LINE__); \
+        while (1)                                               \
+            ;                                                   \
         \                        
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          \
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         \
     }
 #endif
 
 #define SEM_WAITING_FOREVER (-1)
-#define SEM_TAKE_INF(sem, timeout)                                             \
-    if (sem)                                                                   \
-    {                                                                          \
-        ;                                                                      \
-        LOG_PRINT("take buf sem");                                             \
+#define SEM_TAKE_INF(sem, timeout) \
+    if (sem)                       \
+    {                              \
+        ;                          \
+        LOG_PRINT("take buf sem"); \
     }
 
     typedef struct
