@@ -17,7 +17,6 @@
 #ifndef __EB_DEF_H_ //shift+U转换为大写
 #define __EB_DEF_H_
 
-#include <cstddef>
 #ifdef __cplusplus
 extern "C"
 {
