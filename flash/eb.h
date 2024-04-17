@@ -28,9 +28,11 @@ extern "C"
     /** @defgroup eb
   * @{
   */
-    eb_err_t eb_init(void);
-    eb_err_t eb_header_check(uint32_t* cnt);
-    char*    eb_get_data(eb_frame_t* p_frame);
+    eb_err_t eb_init(uint32_t offset, uint32_t bytes);
+    eb_err_t eb_port_init(const eb_port_t* p_port);
+    char*    eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t length);
+    char*    eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length);
+
     /**
   *@}
   */
