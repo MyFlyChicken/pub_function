@@ -1,8 +1,11 @@
-#include "../flash/eb.h"
-#include <cstdio>
+
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include "test.h"
+
+#define EB_LOG_TAG "[TEST_EB]"
+#include "../flash/eb.h"
 
 static const uint16_t crc16_table[] = {
     0x0000,
@@ -331,19 +334,23 @@ int test_flash_init(void)
         .crc16 = flash_crc16,
     };
 
-    eb_port_init((const eb_port_t*)&port);
+    return eb_port_init((const eb_port_t*)&port);
+}
+
+int test_eb_init(void)
+{
     return eb_init(0, FLASH_BYTES);
 }
 
-int test_flash_write(void)
+int test_eb_write(void)
 {
     eb_err_t    ret;
     uint32_t    cnt     = 0;
-    eb_frame_t* p_frame = 0;
+    eb_frame_t* p_frame = eb_get_frame();
     for (int i = 0; i < 100; i++)
     {
         cnt++;
-        //ret = eb_write_data(p_frame, (const char*)&cnt, sizeof(cnt));
+        ret = eb_write_data(p_frame, (const char*)&cnt, sizeof(cnt));
         if (ret)
         {
             break;
@@ -359,13 +366,14 @@ int test_flash_write(void)
     return 0;
 }
 
-int test_flash_read(void)
+int test_eb_read(void)
 {
     eb_err_t    ret;
-    uint32_t    cnt     = 0;
-    eb_frame_t* p_frame = 0;
+    uint32_t    cnt = 0;
+    uint32_t    actual_len;
+    eb_frame_t* p_frame = eb_get_frame();
 
-    //ret = eb_read_data(p_frame, (char*)&cnt, sizeof(cnt));
+    ret = eb_read_data(p_frame, (char*)&cnt, sizeof(cnt), &actual_len);
 
     if (ret)
     {
@@ -375,4 +383,11 @@ int test_flash_read(void)
     printf("read success with cnt=%d", cnt);
 
     return 0;
+}
+
+void test_eb_main(void)
+{
+    test_flash_init();
+    test_eb_write();
+    test_eb_read();
 }

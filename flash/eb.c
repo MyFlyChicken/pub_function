@@ -21,8 +21,6 @@
 #include "eb.h"
 #include "inc/eb_cfg.h"
 #include "inc/eb_def.h"
-#include <cstdint>
-#include <cstring>
 #include <stdint.h>
 
 eb_port_t   _eb_port;
@@ -74,6 +72,31 @@ static eb_err_t _eb_loading(void)
 
 static eb_err_t _eb_reset(void)
 {
+    int ret;
+
+    _eb_frame.offset = sizeof(eb_header_t);
+    _eb_frame.bytes  = EB_FRAME_BYTES_DEFAULT;
+
+    ret = _eb_port.erase(0, _eb_header.bytes);
+    if (ret)
+    {
+        EB_DEBUG("erase flash failed %d", ret);
+        return EB_ERASE_ERR;
+    }
+
+    ret = _eb_port.write(0, (const uint8_t*)&_eb_header, sizeof(eb_header_t));
+    if (ret)
+    {
+        EB_DEBUG("write flash failed %d", ret);
+        return EB_WRITE_ERR;
+    }
+
+    return EB_NO_ERR;
+}
+
+eb_frame_t* eb_get_frame(void)
+{
+    return &_eb_frame;
 }
 
 /**
@@ -160,7 +183,7 @@ eb_err_t eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t len, uint32_t* ac
     return EB_NO_ERR;
 }
 
-char* eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length)
+eb_err_t eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length)
 {
     int        ret;
     eb_frame_t tmp;

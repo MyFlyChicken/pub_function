@@ -29,7 +29,6 @@ extern "C"
   * @defgroup erase_balance_cfg
   * @{
   */
-#define EB_PRINT printf
 //#define EB_USING_NATIVE_ASSERT
 #define EB_DEBUG_ENABLE
 #define EB_ASSERT_EN

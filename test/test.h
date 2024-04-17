@@ -17,37 +17,28 @@
 #define __test_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-#define  UNITY_INCLUDE_CONFIG_H
+#define UNITY_INCLUDE_CONFIG_H
 #include "../UnityTesting/src/unity.h"
-#include "../filter_algo/filter_algo.h"
 
+    /* ----------------------- Defines ------------------------------------------*/
 
-/* ----------------------- Defines ------------------------------------------*/
+    /* ----------------------- Type definitions ---------------------------------*/
 
+    /* ----------------------- Extern variable ---------------------------------*/
+    void test_main(void);
 
+    void test_filter_main(void);
+    void test_eb_main(void);
+    /* ----------------------- Extern function ----------------------------------*/
 
-/* ----------------------- Type definitions ---------------------------------*/
-
-
-
-/* ----------------------- Extern variable ---------------------------------*/
-void test_main(void);
-
-
-/* ----------------------- Extern function ----------------------------------*/
-
-
-
-/* ----------------------- End ----------------------------------------------*/
-
-
+    /* ----------------------- End ----------------------------------------------*/
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif

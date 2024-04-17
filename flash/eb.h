@@ -17,7 +17,6 @@
 #ifndef __EB_H_ //shift+U转换为大写
 #define __EB_H_
 
-#include <algorithm>
 #ifdef __cplusplus
 extern "C"
 {
@@ -31,8 +30,11 @@ extern "C"
   */
     eb_err_t eb_init(uint32_t offset, uint32_t bytes);
     eb_err_t eb_port_init(const eb_port_t* p_port);
-    char*    eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t length);
-    char*    eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length);
+
+    eb_err_t eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t len, uint32_t* actual_len);
+    eb_err_t eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length);
+
+    eb_frame_t* eb_get_frame(void);
     /**
   *@}
   */
