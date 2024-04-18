@@ -35,16 +35,16 @@ extern "C"
 #ifndef EB_PRINT
 #define EB_PRINT(...)    printf(__VA_ARGS__)
 #endif
-#define EB_LOG_PREFIX1() EB_PRINT("[FlashDB]" )
+#define EB_LOG_PREFIX1() EB_PRINT("[EB]" )
 #define EB_LOG_PREFIX2() EB_PRINT(" ")
 #define EB_LOG_PREFIX()  EB_LOG_PREFIX1();EB_LOG_PREFIX2()
 #ifdef EB_DEBUG_ENABLE
-#define EB_DEBUG(...)    EB_LOG_PREFIX();EB_PRINT("(%s:%d) ", __FILE__, __LINE__);EB_PRINT(__VA_ARGS__)
+#define EB_DEBUG(...)    EB_LOG_PREFIX();EB_PRINT("(%s:%d) ", __FILE__, __LINE__);EB_PRINT(__VA_ARGS__);EB_PRINT("\r\n")
 #else
 #define EB_DEBUG(...)
 #endif
 /* routine print function. Must be implement by user. */
-#define EB_INFO(...)                  EB_LOG_PREFIX();EB_PRINT(__VA_ARGS__)
+#define EB_INFO(...)                  EB_LOG_PREFIX();EB_PRINT(__VA_ARGS__);EB_PRINT("\r\n")
 /* assert for developer. */
 #ifdef EB_USING_NATIVE_ASSERT
 #define EB_ASSERT(EXPR)               assert(EXPR);
@@ -59,7 +59,7 @@ if (!(EXPR))                                                                  \
 #endif /* EB_ASSERT */
 /* clang-format on */
 #define EB_FRAME_OFFSET_DEFAULT (0xFFFFFFFF)
-#define EB_FRAME_BYTES_DEFAULT  (0xFFFFFFFF)
+#define EB_FRAME_BYTES_DEFAULT  (0)
 
 #define EB_MEMCOPY memcpy
 #define EB_MEMSET  memset
@@ -115,7 +115,7 @@ typedef struct
 {
     uint32_t offset; /*!< 当前帧在flash中的位置 */
     uint32_t bytes;  /*!< 用户赋值的数据 */
-    uint16_t crc16;  /*!< 数据的crc16结果 */
+    uint32_t crc16;  /*!< 数据的crc16结果 */
 } eb_frame_t;
 #pragma pack()
 /**

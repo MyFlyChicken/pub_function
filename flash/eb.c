@@ -117,11 +117,6 @@ eb_err_t eb_init(uint32_t offset, uint32_t bytes)
     if (ret)
     {
         EB_DEBUG("eb loading failed %d", ret);
-        return ret;
-    }
-    else
-    {
-        return EB_NO_ERR;
     }
 
     EB_MEMSET(_eb_header.name, 0, EB_NAME_MAX_BYTES);
@@ -131,6 +126,7 @@ eb_err_t eb_init(uint32_t offset, uint32_t bytes)
 
     _eb_frame.offset = sizeof(eb_header_t);
     _eb_frame.bytes  = EB_FRAME_BYTES_DEFAULT;
+    _eb_frame.crc16  = 0;
 
     ret = _eb_port.erase(offset, bytes);
     if (ret)
@@ -143,6 +139,13 @@ eb_err_t eb_init(uint32_t offset, uint32_t bytes)
     if (ret)
     {
         EB_DEBUG("write flash failed %d", ret);
+        return EB_WRITE_ERR;
+    }
+
+    ret = _eb_port.write(_eb_frame.offset, (const uint8_t*)&_eb_frame, sizeof(eb_frame_t));
+    if (ret)
+    {
+        EB_DEBUG("write frame failed %d", ret);
         return EB_WRITE_ERR;
     }
 
@@ -167,17 +170,20 @@ eb_err_t eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t len, uint32_t* ac
         *actual_len = p_frame->bytes;
     }
 
-    ret = _eb_port.read(p_frame->offset, (uint8_t*)dst, *actual_len);
+    ret = _eb_port.read(p_frame->offset + sizeof(eb_frame_t), (uint8_t*)dst, *actual_len);
     if (ret)
     {
         EB_DEBUG("read flash frame failed %d", ret);
         return EB_READ_ERR;
     }
 
-    /* 计算CRC */
-    if (p_frame->crc16 != _eb_port.crc16(EB_CRC_INITVAL, (uint8_t*)dst, *actual_len))
+    if (*actual_len)
     {
-        return EB_CRC_ERR;
+        /* 计算CRC */
+        if (p_frame->crc16 != _eb_port.crc16(EB_CRC_INITVAL, (uint8_t*)dst, *actual_len))
+        {
+            return EB_CRC_ERR;
+        }
     }
 
     return EB_NO_ERR;
@@ -203,14 +209,14 @@ eb_err_t eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length)
     tmp.bytes  = length;
     tmp.crc16  = _eb_port.crc16(EB_CRC_INITVAL, (uint8_t*)src, length);
 
-    ret = _eb_port.write(tmp.offset, (const uint8_t*)&tmp, sizeof(eb_header_t));
+    ret = _eb_port.write(tmp.offset, (const uint8_t*)&tmp, sizeof(eb_frame_t));
     if (ret)
     {
         EB_DEBUG("write flash frame failed %d", ret);
         return EB_WRITE_ERR;
     }
 
-    ret = _eb_port.write(tmp.offset + sizeof(eb_header_t), (const uint8_t*)&src, length);
+    ret = _eb_port.write(tmp.offset + sizeof(eb_frame_t), (const uint8_t*)src, length);
     if (ret)
     {
         EB_DEBUG("write flash data failed %d", ret);

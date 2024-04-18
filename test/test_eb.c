@@ -265,7 +265,7 @@ static const uint16_t crc16_table[] = {
     0x8081,
     0x4040};
 
-static char sim_flash[2048];
+static char sim_flash[1024];
 
 #define FLASH_BYTES sizeof(sim_flash)
 
@@ -388,6 +388,7 @@ int test_eb_read(void)
 void test_eb_main(void)
 {
     test_flash_init();
+    test_eb_init();
     test_eb_write();
     test_eb_read();
 }
