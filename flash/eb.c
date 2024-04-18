@@ -1,7 +1,7 @@
 /**
  * @file eb.c
  * @author MyFlyChicken ()
- * @brief 
+ * @brief 该模块实现均衡擦写，个人能力有限，暂不支持坏块管理
  * @version 0.0.1
  * @date 2024-04-16
  * 
@@ -29,7 +29,6 @@ eb_header_t _eb_header;
 
 /**
  * @brief 上电加载数据
- * @param [in] cnt 
  * @return eb_err_t 
  * 
  * @details 需要在eb_init之前调用，返回失败调用eb_init
@@ -70,6 +69,12 @@ static eb_err_t _eb_loading(void)
     return EB_NO_ERR;
 }
 
+/**
+ * @brief 管理区域写满后会进行复位，调用该函数
+ * @return eb_err_t 
+ * 
+ * @details 
+ */
 static eb_err_t _eb_reset(void)
 {
     int ret;
@@ -94,6 +99,12 @@ static eb_err_t _eb_reset(void)
     return EB_NO_ERR;
 }
 
+/**
+ * @brief 获取frame信息
+ * @return eb_frame_t* 
+ * 
+ * @details 
+ */
 eb_frame_t* eb_get_frame(void)
 {
     return &_eb_frame;
@@ -101,10 +112,11 @@ eb_frame_t* eb_get_frame(void)
 
 /**
  * @brief 初始化eb管理flash区域
- * @param [in] bytes 
+ * @param [in] offset 偏移
+ * @param [in] bytes 管理区域字节
  * @return eb_err_t 
  * 
- * @details 
+ * @details 第一次写入会写入一个空的frame
  */
 eb_err_t eb_init(uint32_t offset, uint32_t bytes)
 {
@@ -152,6 +164,16 @@ eb_err_t eb_init(uint32_t offset, uint32_t bytes)
     return EB_NO_ERR;
 }
 
+/**
+ * @brief 读取数据
+ * @param [in] p_frame 考虑删除？
+ * @param [in] dst 目标缓存区指针
+ * @param [in] len 想要读取的长度
+ * @param [in] actual_len 实际读取的长度
+ * @return eb_err_t 
+ * 
+ * @details 
+ */
 eb_err_t eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t len, uint32_t* actual_len)
 {
     int ret;
@@ -189,6 +211,15 @@ eb_err_t eb_read_data(eb_frame_t* p_frame, char* dst, uint32_t len, uint32_t* ac
     return EB_NO_ERR;
 }
 
+/**
+ * @brief 写入数据
+ * @param [in] p_frame 考虑删除？
+ * @param [in] src 数据源
+ * @param [in] length 数据源长度
+ * @return eb_err_t 
+ * 
+ * @details 
+ */
 eb_err_t eb_write_data(eb_frame_t* p_frame, const char* src, uint32_t length)
 {
     int        ret;
