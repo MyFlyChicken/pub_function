@@ -33,6 +33,7 @@ extern "C"
 
     void test_filter_main(void);
     void test_eb_main(void);
+    void test_led_main(void);
     /* ----------------------- Extern function ----------------------------------*/
 
     /* ----------------------- End ----------------------------------------------*/
