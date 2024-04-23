@@ -9,9 +9,11 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/filter_algo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/func/mulit_led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_filter.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
     ${CMAKE_CURRENT_SOURCE_DIR}/flash/eb.c
 )
