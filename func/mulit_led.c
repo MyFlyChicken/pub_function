@@ -40,6 +40,22 @@ void mulit_led_action_set(mulit_led_map_t* p_map, LED_ACTION action, uint16_t ti
 }
 
 /**
+ * @brief 拷贝mulit_led_map_t的相关设置
+ * @param [in] dst_map 目标map
+ * @param [in] src_map 数据源
+ * 
+ * @details 
+ */
+void mulit_led_action_copy(mulit_led_map_t* dst_map, const mulit_led_map_t* src_map)
+{
+    dst_map->flag      = 0;
+    dst_map->action    = src_map->action;
+    dst_map->timeout1  = src_map->timeout1;
+    dst_map->timeout2  = src_map->timeout2;
+    dst_map->tick_last = 0;
+}
+
+/**
  * @brief led控制函数，周期调用
  * @param [in] led_map mulit_led_map_t数组指针
  * @param [in] group mulit_led_map_t的组数
