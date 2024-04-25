@@ -1,5 +1,4 @@
 #include "mulit_led.h"
-#include <cstdint>
 
 #define __WEAK __attribute__((weak))
 

@@ -5,4 +5,5 @@ void test_main(void)
     test_filter_main();
     test_eb_main();
     test_led_main();
+    test_mrmem_main();
 }
