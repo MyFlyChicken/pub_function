@@ -14,6 +14,7 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_filter.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_c_language.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_mr_mem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c

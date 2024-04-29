@@ -6,4 +6,5 @@ void test_main(void)
     test_eb_main();
     test_led_main();
     test_mrmem_main();
+    test_struct_assign();
 }

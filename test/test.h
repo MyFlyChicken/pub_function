@@ -35,6 +35,7 @@ extern "C"
     void test_eb_main(void);
     void test_led_main(void);
     void test_mrmem_main(void);
+    void test_struct_assign(void);
     /* ----------------------- Extern function ----------------------------------*/
 
     /* ----------------------- End ----------------------------------------------*/
