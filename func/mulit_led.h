@@ -30,15 +30,17 @@ extern "C"
         }ops;
         uint8_t flag  : 1;
         uint8_t index : 7;/*!< 保留，led操作函数需要传入参数时调用该值 */
-        LED_ACTION action; 
-        uint16_t timeout1;
-        uint16_t timeout2;
+        LED_ACTION action;
+        uint16_t time_on;
+        uint16_t time_off;
+        uint16_t time_cnt;
         uint32_t tick_last;
     } mulit_led_map_t;
 
-    extern void mulit_led_init(uint32_t tick_max);
+    extern void mulit_led_init(uint32_t tick_max);    
     extern void mulit_led_main(mulit_led_map_t* led_map, uint8_t group);
-    extern void mulit_led_action_set(mulit_led_map_t* p_map, LED_ACTION action, uint16_t timeout1, uint16_t timeout2);
+    extern void mulit_led_action_copy(mulit_led_map_t* dst_map, const mulit_led_map_t* src_map);
+    extern void mulit_led_action_set(mulit_led_map_t* p_map, LED_ACTION action, uint16_t time_on, uint16_t time_off);
     /* clang-format on */
 
 #ifdef __cplusplus

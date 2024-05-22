@@ -29,13 +29,14 @@ void mulit_led_init(uint32_t tick_max)
  * 
  * @details 
  */
-void mulit_led_action_set(mulit_led_map_t* p_map, LED_ACTION action, uint16_t timeout1, uint16_t timeout2)
+void mulit_led_action_set(mulit_led_map_t* p_map, LED_ACTION action, uint16_t time_on, uint16_t time_off)
 {
     p_map->flag      = 0;
     p_map->action    = action;
-    p_map->timeout1  = timeout1;
-    p_map->timeout2  = timeout2;
+    p_map->time_on   = time_on;
+    p_map->time_off  = time_off;
     p_map->tick_last = 0;
+    p_map->time_cnt  = 0;
 }
 
 /**
@@ -49,9 +50,10 @@ void mulit_led_action_copy(mulit_led_map_t* dst_map, const mulit_led_map_t* src_
 {
     dst_map->flag      = 0;
     dst_map->action    = src_map->action;
-    dst_map->timeout1  = src_map->timeout1;
-    dst_map->timeout2  = src_map->timeout2;
+    dst_map->time_on   = src_map->time_on;
+    dst_map->time_off  = src_map->time_off;
     dst_map->tick_last = 0;
+    dst_map->time_cnt  = 0;
 }
 
 /**
@@ -68,31 +70,35 @@ void mulit_led_main(mulit_led_map_t* led_map, uint8_t group)
 
     for (i = 0; i < group; i++)
     {
-        if (LED_ON == led_map[i].action)
+        if (LED_TOGGLE == led_map[i].action)
         {
-            led_map[i].flag = 0;
+            if (led_map[i].time_cnt < led_map[i].time_on)
+            {
+                led_map[i].ops.on();
+            }
+            else if (led_map[i].time_cnt < (led_map[i].time_on + led_map[i].time_off))
+            {
+                led_map[i].ops.off();
+            }
+            else
+            {
+                led_map[i].time_cnt = 0;
+                led_map[i].ops.on();
+            }
+
+            tick = mulit_led_tick_get();
+            delt = (tick >= led_map[i].tick_last) ? (tick - led_map[i].tick_last) : (_tick_max - led_map[i].tick_last + tick);
+
+            led_map[i].time_cnt  += delt;
+            led_map[i].tick_last  = tick;
+        }
+        else if (LED_ON == led_map[i].action)
+        {
             led_map[i].ops.on();
         }
         else if (LED_OFF == led_map[i].action)
         {
-            led_map[i].flag = 0;
             led_map[i].ops.off();
-        }
-        else if (LED_TOGGLE == led_map[i].action)
-        {
-            tick = mulit_led_tick_get();
-            delt = (tick >= led_map[i].tick_last) ? (tick - led_map[i].tick_last) : (_tick_max - led_map[i].tick_last + tick);
-            if ((delt >= led_map[i].timeout1) && (0 == led_map[i].flag))
-            {
-                led_map[i].flag = 1;
-                led_map[i].ops.on();
-            }
-            else if (delt > led_map[i].timeout2)
-            {
-                led_map[i].flag = 0;
-                led_map[i].ops.off();
-                led_map[i].tick_last = mulit_led_tick_get();
-            }
         }
     }
 }

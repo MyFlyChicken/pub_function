@@ -1,5 +1,6 @@
 #include "../mr_mem/mr_mem.h"
 #include "stdlib.h"
+
 void test_mrmem_main(void)
 {
     int   i = 0;
@@ -22,9 +23,4 @@ void test_mrmem_main(void)
             return;
         }
     }
-
-    // for (int j = 0; j < i; j++)
-    // {
-    //     mr_free(p[j]);
-    // }
 }
