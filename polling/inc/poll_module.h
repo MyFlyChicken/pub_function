@@ -34,7 +34,7 @@ typedef struct {
  */
 #define poll_task_register(name, handle, interval)           \
     static unsigned int __task_timer_##handle;              \
-    USED ANONY_TYPE(const poll_item_t, poll_task_##handle)  \
+    USED ANONY_TYPE(const poll_task_t, poll_task_##handle)  \
     SECTION("poll.task.1") =                                \
     {name, handle, interval, &__task_timer_##handle}
 
