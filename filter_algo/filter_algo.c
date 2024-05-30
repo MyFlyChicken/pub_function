@@ -3,7 +3,7 @@
 /* ----------------------- Platform includes --------------------------------*/
 #include "filter_algo.h"
 
-#include "../aud_log.h"
+#include "../mf_log.h"
 #include <stdint.h>
 
 /* ----------------------- Defines ------------------------------------------*/
@@ -95,12 +95,9 @@ int16_t filter2(int16_t num)
     ALGO_ASSERT(num > 1);
     //TODO 直接修改原始数据合理么？
     value_buf = (int16_t*)_filter_inf.get_currval(num);
-    for (j = 0; j < (num - 1); j++)
-    {
-        for (i = 0; i < (num - j - 1); i++)
-        {
-            if (value_buf[i] > value_buf[i + 1])
-            {
+    for (j = 0; j < (num - 1); j++) {
+        for (i = 0; i < (num - j - 1); i++) {
+            if (value_buf[i] > value_buf[i + 1]) {
                 temp             = value_buf[i];
                 value_buf[i]     = value_buf[i + 1];
                 value_buf[i + 1] = temp;
@@ -144,8 +141,7 @@ int16_t filter3(int16_t num)
     value_buf = (int16_t*)_filter_inf.get_currval(num);
 
     average = value_buf[0];
-    for (int i = 1; i < num; i++)
-    {
+    for (int i = 1; i < num; i++) {
         average = average + (value_buf[i] - average) / (i + 1);
     }
 
@@ -232,12 +228,9 @@ int16_t filter5(int16_t num)
     value_buf = (int16_t*)_filter_inf.get_currval(num);
 
     //TODO 直接修改原始数据合理么？
-    for (j = 0; j < (num - 1); j++)
-    {
-        for (i = 0; i < (num - j - 1); i++)
-        {
-            if (value_buf[i] > value_buf[i + 1])
-            {
+    for (j = 0; j < (num - 1); j++) {
+        for (i = 0; i < (num - j - 1); i++) {
+            if (value_buf[i] > value_buf[i + 1]) {
                 tmp              = value_buf[i];
                 value_buf[i]     = value_buf[i + 1];
                 value_buf[i + 1] = tmp;
@@ -246,8 +239,7 @@ int16_t filter5(int16_t num)
     }
 
     average = value_buf[1];
-    for (i = 2; i < num - 1; i++)
-    {
+    for (i = 2; i < num - 1; i++) {
         //printf("%f\r\n", average);
         average = average + (value_buf[i] - average) / (i + 1);
     }
@@ -334,8 +326,7 @@ int16_t filter8(int16_t* weights, int16_t weights_num, int16_t sa_num)
     // 计算加权平均值
     i    = 0;
     sum += value_buf[i] * weights[i];
-    while (--sa_num)
-    {
+    while (--sa_num) {
         sum  += value_buf[i] * weights[i];
         sum >>= 1;
     }

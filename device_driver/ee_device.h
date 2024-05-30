@@ -27,6 +27,12 @@ extern "C" {
 #include <stdint.h>
 
 #define EE_NAME_MAX (12U)
+#define EE_SUPPORT_MEM
+
+#ifdef EE_SUPPORT_MEM
+#define EE_MALLOC malloc
+#define EE_FREE   free
+#endif
 
 enum ee_device_class_type {
     Device_Class_Char = 0, /**< character device */
@@ -67,9 +73,10 @@ typedef struct {
     int (*control)(ee_device_t dev, int cmd, void* args);
 } ee_ops, *ee_ops_t;
 
-void ee_device_register(const ee_device_t dev, const ee_obj_t parent, const ee_ops_t ops, const void* user_data);
-void ee_device_set_indicate(const ee_device_t dev, int (*rx_indicate)(ee_device_t dev, uint32_t size));
-void ee_device_set_complete(const ee_device_t dev, int (*tx_complete)(ee_device_t dev, void* buffer));
+ee_device_t ee_device_creat(const ee_obj_t parent, const ee_ops_t ops, const void* user_data);
+void        ee_device_register(const ee_device_t dev, const ee_obj_t parent, const ee_ops_t ops, const void* user_data);
+void        ee_device_set_indicate(const ee_device_t dev, int (*rx_indicate)(ee_device_t dev, uint32_t size));
+void        ee_device_set_complete(const ee_device_t dev, int (*tx_complete)(ee_device_t dev, void* buffer));
 
 #ifdef __cplusplus
 }
