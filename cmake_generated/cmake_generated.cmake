@@ -11,12 +11,12 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem/mr_mem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/device_driver/ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/func/mulit_led.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/func/mulit_blink.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_filter.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_c_language.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_led.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_blink.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_mr_mem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
