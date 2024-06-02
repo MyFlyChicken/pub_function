@@ -11,7 +11,7 @@
 #define NULL 0
 #endif
 
-#define ALGO_ASSERT(x) AUD_ASSERT(x)
+#define ALGO_ASSERT(x) MF_ASSERT(x)
 
 /* ----------------------- Type definitions ---------------------------------*/
 typedef struct

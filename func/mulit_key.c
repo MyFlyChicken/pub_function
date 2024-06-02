@@ -17,61 +17,48 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
 {
     ASSERT(handle != NULL);
 
-    if (handle->state > 0)
-    {
+    if (handle->state > 0) {
         handle->ticks++;
     }
-    
+
 #if (KEY_PHY_DEFAULT == KEY_DETECTION_DIG)
     /*------------button debounce handle---------------*/
-    if (input != handle->button_level)
-    { // not equal to prev one
+    if (input != handle->button_level) { // not equal to prev one
         // continue read 3 times same new level change
-        if (++(handle->filter_cnt) >= KEY_FILTER_TICKS)
-        {
+        if (++(handle->filter_cnt) >= KEY_FILTER_TICKS) {
             handle->button_level = input;
             handle->filter_cnt   = 0;
         }
     }
-    else
-    { // leved not change ,counter reset.
+    else { // leved not change ,counter reset.
         handle->filter_cnt = 0;
     }
 #else
-    if ((input >= (handle->active_level - KEY_ADC_DELT)) && (input <= (handle->active_level + KEY_ADC_DELT)))
-    {
-        if ((handle->button_level >= (handle->active_level - KEY_ADC_DELT)) && (handle->button_level <= (handle->active_level + KEY_ADC_DELT)))
-        {
-            handle->filter_cnt  = 0;
+    if ((input >= (handle->active_level - KEY_ADC_DELT)) && (input <= (handle->active_level + KEY_ADC_DELT))) {
+        if ((handle->button_level >= (handle->active_level - KEY_ADC_DELT)) && (handle->button_level <= (handle->active_level + KEY_ADC_DELT))) {
+            handle->filter_cnt = 0;
         }
-        else
-        {
-            if (++(handle->filter_cnt) >= KEY_FILTER_TICKS)
-            {
+        else {
+            if (++(handle->filter_cnt) >= KEY_FILTER_TICKS) {
                 handle->button_level = input;
                 handle->filter_cnt   = 0;
             }
         }
     }
-    else
-    {
-        if ((handle->button_level >= (handle->active_level - KEY_ADC_DELT)) && (handle->button_level <= (handle->active_level + KEY_ADC_DELT)))
-        {
-            if (++(handle->filter_cnt) >= KEY_FILTER_TICKS)
-            {
+    else {
+        if ((handle->button_level >= (handle->active_level - KEY_ADC_DELT)) && (handle->button_level <= (handle->active_level + KEY_ADC_DELT))) {
+            if (++(handle->filter_cnt) >= KEY_FILTER_TICKS) {
                 handle->button_level = input;
                 handle->filter_cnt   = 0;
             }
         }
-        else
-        {
-            handle->filter_cnt  = 0;
+        else {
+            handle->filter_cnt = 0;
         }
     }
 #endif
     /*-----------------State machine-------------------*/
-    switch (handle->state)
-    {
+    switch (handle->state) {
     case 0:
 #if (KEY_PHY_DEFAULT == KEY_DETECTION_DIG)
         if (handle->button_level == handle->active_level)
@@ -85,8 +72,7 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
             handle->state  = 1;
             LOG_PRINT("%8x key_state is %d", handle, handle->event);
         }
-        else
-        {
+        else {
             handle->event = (unsigned char)KEY_NONE_PRESS;
         }
 
@@ -103,8 +89,7 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
             handle->ticks = 0;
             handle->state = 2;
         }
-        else if (handle->ticks > KEY_LONG_TICKS)
-        {
+        else if (handle->ticks > KEY_LONG_TICKS) {
             handle->event = (unsigned char)KEY_LONG_PRESS_START;
             handle->state = 5;
         }
@@ -123,14 +108,11 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
             handle->ticks = 0;
             handle->state = 3;
         }
-        else if (handle->ticks > KEY_SHORT_TICKS)
-        { // released timeout
-            if (handle->repeat == 1)
-            {
+        else if (handle->ticks > KEY_SHORT_TICKS) { // released timeout
+            if (handle->repeat == 1) {
                 handle->event = (unsigned char)KEY_SINGLE_CLICK;
             }
-            else if (handle->repeat == 2)
-            {
+            else if (handle->repeat == 2) {
                 handle->event = (unsigned char)KEY_DOUBLE_CLICK;
             }
             handle->state = 0;
@@ -146,18 +128,15 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
 #endif
         { // released press up
             handle->event = (unsigned char)KEY_PRESS_UP;
-            if (handle->ticks < KEY_SHORT_TICKS)
-            {
+            if (handle->ticks < KEY_SHORT_TICKS) {
                 handle->ticks = 0;
                 handle->state = 2; // repeat press
             }
-            else
-            {
+            else {
                 handle->state = 0;
             }
         }
-        else if (handle->ticks > KEY_SHORT_TICKS)
-        { // long press up
+        else if (handle->ticks > KEY_SHORT_TICKS) { // long press up
             handle->state = 0;
         }
         LOG_PRINT("%8x key_state is %d", handle, handle->event);
@@ -173,8 +152,7 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
             // continue hold trigger
             handle->event = (unsigned char)KEY_LONG_PRESS_HOLD;
         }
-        else
-        { // releasd
+        else { // releasd
             handle->event = (unsigned char)KEY_PRESS_UP;
             handle->state = 0; // reset
         }
@@ -185,4 +163,3 @@ void mulit_key_scan(unsigned long input, mulit_key_t* handle)
         break;
     }
 }
-

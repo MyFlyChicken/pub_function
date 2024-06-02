@@ -3,7 +3,7 @@
 
 void test_mrmem_main(void)
 {
-    int   i = 200000000;
+    int   i = 10;
     void* p;
 
     mr_heap_init();
