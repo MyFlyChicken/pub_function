@@ -15,7 +15,10 @@
 
 #define MF_LOG_EN       (1U)
 #define MF_LOG_COLOR_EN (1U)
-#define AUD_ASSERT_EN   (1U)
+
+#ifndef MF_ASSERT_EN
+#define MF_ASSERT_EN (1U) /* 默认开启断言 */
+#endif
 /*****************************************************************/
 /*********************** 进行DEBUG ****************************/
 #if MF_LOG_EN
@@ -98,8 +101,8 @@ typedef enum {
 /*********************************************************************/
 /***************************   校验实参   *****************************/
 /* clang-format off */
-#if AUD_ASSERT_EN
-#define AUD_ASSERT(n)                                              \
+#if MF_ASSERT_EN
+#define MF_ASSERT(n)                                              \
     do                                                                  \
     {                                                                   \
         if (!(n))                                                       \
@@ -110,7 +113,7 @@ typedef enum {
     }while (0)
 /* clang-format on */
 #else
-#define AUD_ASSERT(n)
+#define MF_ASSERT(n)
 #endif
 
 #endif /* __LOG_PRINT_H__*/
