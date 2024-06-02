@@ -17,28 +17,28 @@
 #define __test_H_
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #define UNITY_INCLUDE_CONFIG_H
 #include "../UnityTesting/src/unity.h"
 
-    /* ----------------------- Defines ------------------------------------------*/
+/* ----------------------- Defines ------------------------------------------*/
 
-    /* ----------------------- Type definitions ---------------------------------*/
+/* ----------------------- Type definitions ---------------------------------*/
 
-    /* ----------------------- Extern variable ---------------------------------*/
-    void test_main(void);
+/* ----------------------- Extern variable ---------------------------------*/
+void test_main(void);
 
-    void test_filter_main(void);
-    void test_eb_main(void);
-    void test_led_main(void);
-    void test_mrmem_main(void);
-    void test_struct_assign(void);
-    /* ----------------------- Extern function ----------------------------------*/
+void test_filter_main(void);
+void test_eb_main(void);
+void test_led_main(void);
+void test_mrmem_main(void);
+void test_struct_assign(void);
+void test_ee_device(void);
+/* ----------------------- Extern function ----------------------------------*/
 
-    /* ----------------------- End ----------------------------------------------*/
+/* ----------------------- End ----------------------------------------------*/
 
 #ifdef __cplusplus
 }

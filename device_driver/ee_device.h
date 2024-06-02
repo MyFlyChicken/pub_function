@@ -20,7 +20,6 @@
 #ifndef __ee_device_H_ //shift+U转换为大写
 #define __ee_device_H_
 
-#include <cstdint>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,20 +37,31 @@ enum ee_device_class_type {
     Device_Class_Char = 0, /**< character device */
 };
 
-//typedef struct ee_obj* ee_obj_t;
-typedef struct {
+typedef struct ee_obj*    ee_obj_t;
+typedef struct ee_ops*    ee_ops_t;
+typedef struct ee_device* ee_device_t;
+
+struct ee_obj {
     char                      name[EE_NAME_MAX]; /**< name of kernel object */
     enum ee_device_class_type type;              /**< device type */
     uint16_t                  flag;              /**< flag of kernel object */
     uint16_t                  open_flag;         /**< device open flag */
     uint8_t                   ref_count;         /**< reference count */
-} ee_obj, *ee_obj_t;
+};
 
-//typedef struct ee_device* ee_device_t;
-typedef struct {
-    struct ee_obj parent;
+struct ee_ops {
+    /* common device interface */
+    int (*init)(ee_device_t dev);
+    int (*open)(ee_device_t dev, uint32_t oflag);
+    int (*close)(ee_device_t dev);
+    int (*read)(ee_device_t dev, uint32_t pos, void* buffer, uint32_t size);
+    int (*write)(ee_device_t dev, uint32_t pos, const void* buffer, uint32_t size);
+    int (*control)(ee_device_t dev, int cmd, void* args);
+};
 
-    ee_ops_t ops;
+struct ee_device {
+    struct ee_obj obj;
+    ee_ops_t      ops;
 
     uint8_t device_id; /**< 保留 0 - 255 */
 
@@ -60,23 +70,22 @@ typedef struct {
     int (*tx_complete)(ee_device_t dev, void* buffer);
 
     void* user_data; /**< device private data 一般用于存放配置文件的指针 */
-} ee_device, *ee_device_t;
 
-//typedef struct ee_ops* ee_ops_t;
-typedef struct {
-    /* common device interface */
-    int (*init)(ee_device_t dev);
-    int (*open)(ee_device_t dev, uint32_t oflag);
-    int (*close)(ee_device_t dev);
-    int (*read)(ee_device_t dev, uint32_t pos, void* buffer, uint32_t size);
-    int (*write)(ee_device_t dev, uint32_t pos, const void* buffer, uint32_t size);
-    int (*control)(ee_device_t dev, int cmd, void* args);
-} ee_ops, *ee_ops_t;
+    ee_device_t next;
+};
 
-ee_device_t ee_device_creat(const ee_obj_t parent, const ee_ops_t ops, const void* user_data);
-void        ee_device_register(const ee_device_t dev, const ee_obj_t parent, const ee_ops_t ops, const void* user_data);
-void        ee_device_set_indicate(const ee_device_t dev, int (*rx_indicate)(ee_device_t dev, uint32_t size));
-void        ee_device_set_complete(const ee_device_t dev, int (*tx_complete)(ee_device_t dev, void* buffer));
+void ee_device_register(const ee_device_t dev, const ee_obj_t obj, const ee_ops_t ops, const void* user_data);
+
+int  ee_device_init(ee_device_t dev);
+int  ee_device_open(ee_device_t dev, uint32_t oflag);
+int  ee_device_close(ee_device_t dev);
+int  ee_device_read(ee_device_t dev, uint32_t pos, void* buffer, uint32_t size);
+int  ee_device_write(ee_device_t dev, uint32_t pos, const void* buffer, uint32_t size);
+int  ee_device_control(ee_device_t dev, int cmd, void* args);
+void ee_device_set_indicate(const ee_device_t dev, int (*rx_indicate)(ee_device_t dev, uint32_t size));
+void ee_device_set_complete(const ee_device_t dev, int (*tx_complete)(ee_device_t dev, void* buffer));
+
+ee_device_t ee_device_find(const char* name);
 
 #ifdef __cplusplus
 }

@@ -9,6 +9,7 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
     ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/filter_algo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem/mr_mem.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/device_driver/ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/mulit_led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
@@ -17,6 +18,7 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_c_language.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_led.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_mr_mem.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
     ${CMAKE_CURRENT_SOURCE_DIR}/flash/eb.c
 )
@@ -27,6 +29,7 @@ set(include_c_DIRS ${include_c_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo
     ${CMAKE_CURRENT_SOURCE_DIR}/func
     ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem
+    ${CMAKE_CURRENT_SOURCE_DIR}/device_driver
     ${CMAKE_CURRENT_SOURCE_DIR}/test
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/examples

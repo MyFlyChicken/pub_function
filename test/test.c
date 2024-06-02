@@ -7,4 +7,5 @@ void test_main(void)
     test_led_main();
     test_mrmem_main();
     test_struct_assign();
+    test_ee_device();
 }
