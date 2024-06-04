@@ -8,4 +8,5 @@ void test_main(void)
     test_mrmem_main();
     test_struct_assign();
     test_ee_device();
+    test_async();
 }
