@@ -20,7 +20,7 @@ struct qlink_node {
 /*链式队列管理器 -------------------------------------------------------------*/
 struct qlink {
     unsigned int       count;
-    struct qlink_node *front, *rear;
+    struct qlink_node *front, *rear; //front队首  rear队尾
 };
 
 /*******************************************************************************
@@ -42,12 +42,12 @@ static inline void qlink_init(struct qlink* q)
 static inline void qlink_put(struct qlink* q, struct qlink_node* n)
 {
     if (q->count == 0)
-        q->front = n;
+        q->front = n; //count为0时，同时将front rear赋值为n
     else
-        q->rear->next = n;
-    q->rear = n;
-    n->next = NULL;
-    q->count++;
+        q->rear->next = n; //count不为0时，赋值qlink_node的成员next，同时导致front的next也更新
+    q->rear = n;           //rear总是最后的指针
+    n->next = NULL;        //最后的指针永远没有数据
+    q->count++;            //链表计数
 }
 
 /*******************************************************************************
@@ -70,9 +70,9 @@ static inline struct qlink_node* qlink_get(struct qlink* q)
     struct qlink_node* n;
     if (q->count == 0)
         return NULL;
-    n        = q->front;
-    q->front = q->front->next;
-    q->count--;
+    n        = q->front;       //根据qlink_put逻辑，front永远为最先压入的链表
+    q->front = q->front->next; //更新front
+    q->count--;                //计数链表
     return n;
 }
 

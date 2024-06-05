@@ -131,6 +131,8 @@ void async_work_func13(async_work_t* w, void* object, void* params)
 
 void test_async(void)
 {
+    int i = 13;
+
     async_work_init(&w, w_node, sizeof(w_node)/sizeof(work_node_t));
 
     async_work_add(&w, NULL, NULL, async_work_func1);
@@ -142,5 +144,8 @@ void test_async(void)
     async_work_add(&w, NULL, NULL, async_work_func7);
     async_work_add(&w, NULL, NULL, async_work_func8);
     async_work_add(&w, NULL, NULL, async_work_func9);    
-    async_work_process(&w);
+    
+    while (i--) {
+        async_work_process(&w);
+    }
 }
