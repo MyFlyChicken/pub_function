@@ -37,6 +37,7 @@ void test_mrmem_main(void);
 void test_struct_assign(void);
 void test_ee_device(void);
 void test_async(void);
+void test_polling(void);
 /* ----------------------- Extern function ----------------------------------*/
 
 /* ----------------------- End ----------------------------------------------*/

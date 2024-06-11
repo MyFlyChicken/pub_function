@@ -9,4 +9,5 @@ void test_main(void)
     test_struct_assign();
     test_ee_device();
     test_async();
+    test_polling();
 }
