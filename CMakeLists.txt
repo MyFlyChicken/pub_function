@@ -40,7 +40,8 @@ set(symbols_cxx_SYMB)
 set(symbols_asm_SYMB)
 
 # Link directories and names of libraries
-set(link_DIRS)
+set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -T ${CMAKE_SOURCE_DIR}/linker.lds")
+set(link_DIRS )#${CMAKE_SOURCE_DIR}/linker.lds
 set(link_LIBS)
 
 # Compiler options
