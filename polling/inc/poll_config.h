@@ -2,13 +2,8 @@
 #define __poll_config_H_
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-    /* clang-format off */
-
-    /* clang-format on */
-
 #ifdef __cplusplus
 }
 #endif
