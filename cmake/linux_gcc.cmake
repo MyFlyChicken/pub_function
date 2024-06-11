@@ -4,7 +4,7 @@ set(CMAKE_SYSTEM_PROCESSOR          x86-64)
 # Some default GCC settings
 # arm-none-eabi- must be part of path environment
 set(TOOLCHAIN_PREFIX                x86_64-pc-linux-gnu-)
-set(FLAGS                           "-m32 -fdata-sections -ffunction-sections -Wl,--gc-sections")
+set(FLAGS                           "-fdata-sections -ffunction-sections -Wl,--gc-sections")
 set(CPP_FLAGS                       "${FLAGS} -fno-rtti -fno-exceptions -fno-threadsafe-statics")
 
 set(CMAKE_C_FLAGS                   ${FLAGS})
