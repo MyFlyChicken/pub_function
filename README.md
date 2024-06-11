@@ -18,7 +18,7 @@
 | [func](./func)                 | 包含了自己写的一些框架，如 fifo、btn、blink、menu            | PASS     |
 | [mr_mem](./mr_mem)             | 裸机的动态内存申请与释放，移植自 [mr-library](git@gitee.com:MacRsh/mr-library.git) | PASS     |
 | [osal](./osal)                 | 对嵌入式多种rtos API的封装，方便做移植。该文件移植自[CherryUSB](https://github.com/cherry-embedded/CherryUSB) |          |
-| [polling](./polling)           | 裸机框架，支持类似于rt-thread的自动初始化的方式。移植自[AT-Command内的none-os](https://gitee.com/moluo-tech/AT-Command/tree/master/samples/none_os) |          |
+| [polling](./polling)           | 裸机框架，支持类似于rt-thread的自动初始化的方式。移植自[AT-Command内的none-os](https://gitee.com/moluo-tech/AT-Command/tree/master/samples/none_os) | PASS     |
 | [UnityTesting](./UnityTesting) | 单元测试框架，来自[Unity](https://github.com/ThrowTheSwitch/Unity) |          |
 |                                |                                                              |          |
 |                                |                                                              |          |
@@ -39,5 +39,4 @@
 - [ ] eventos-copy注释完善
 
 表驱动框架，一般用在通讯协议或者事件驱动
-
 
