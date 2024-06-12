@@ -20,7 +20,7 @@ bool func_queue_put(func_queue_t* q, void* element);
 bool func_queue_get(func_queue_t* q, void* element);
 bool func_queue_del(func_queue_t* q);
 void func_queue_clr(func_queue_t* q);
-int  func_queue_len(func_queue_t* q);
+int  func_queue_size(func_queue_t* q);
 
 #ifdef __cplusplus
 }
