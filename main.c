@@ -14,15 +14,12 @@
  * </table>
  */
 
-#include "public.h"
+#include "public/public.h"
 #include <stdio.h>
 #include "test/test.h"
 
-
-
 int main()
 {
-    
     test_main();
 
     return 0;
