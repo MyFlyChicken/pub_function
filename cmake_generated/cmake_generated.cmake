@@ -21,10 +21,12 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_async.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_polling.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_func_queue.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
     ${CMAKE_CURRENT_SOURCE_DIR}/flash/eb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/async_work/async_work.c
     ${CMAKE_CURRENT_SOURCE_DIR}/polling/src/polling.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/func/func_queue.c
 )
 
 message(${CMAKE_CURRENT_SOURCE_DIR})
@@ -41,6 +43,7 @@ set(include_c_DIRS ${include_c_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/flash
     ${CMAKE_CURRENT_SOURCE_DIR}/async_work
     ${CMAKE_CURRENT_SOURCE_DIR}/polling/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/func
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 message(${include_c_DIRS})
