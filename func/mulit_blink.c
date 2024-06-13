@@ -18,11 +18,9 @@
  * @endcode
  */
 #include "mulit_blink.h"
-#include <cstdint>
 
 #define __WEAK __attribute__((weak))
 
-uint32_t _tick_max = 0xFFFFFFFF;
 mulit_blink_map_t _mulit_blink_head = NULL;
 
 __WEAK uint32_t mulit_blink_tick_get(void)
@@ -31,34 +29,35 @@ __WEAK uint32_t mulit_blink_tick_get(void)
 }
 
 /**
- * @brief 初始化mulit_blink的tick最大计数
- * @param [in] tick_max 最大tick计数
+ * @brief 初始化blink
+ * @param [in] blink 指针
+ * @param [in] ops 操作函数
+ * @param [in] action 动作
+ * @param [in] time 时间，高16位time_on，低16位time_off 
  * 
  * @details 
  */
-void mulit_blink_tick_init(uint32_t tick_max)
+void mulit_blink_init(mulit_blink_map_t blink, const struct blink_ops* ops, uint8_t action, uint32_t time)
 {
-    _tick_max = tick_max;
-}
+    mulit_blink_map_t tmp = NULL;
 
-void mulit_blink_init(mulit_blink_map_t blink, const struct blink_ops* ops, uint16_t time_on, uint16_t time_off)
-{    
-    if (!_mulit_blink_head) {
-        while (NULL == _mulit_blink_head->next) {
-           _mulit_blink_head->next = blink;
+    if (_mulit_blink_head) {
+        tmp = _mulit_blink_head;
+        while (NULL != tmp->next) {
+            tmp = tmp->next;
         }
+        tmp->next = blink;
     }
     else {
         _mulit_blink_head = blink;
     }
-    blink->next = NULL;
-    blink->ops = ops;
-    blink->time_on = time_on;
-    blink->time_on = time_off;
-    blink->time_cnt  = 0;
-    blink->tick_last = 0;       
-
-    _mulit_blink_head->next = NULL;
+    blink->action    = action;
+    blink->next      = NULL;
+    blink->ops       = ops;
+    blink->time_on   = time >> 16;
+    blink->time_off  = time & 0xFFFF;
+    blink->time_cnt  = MULIT_TICK_MAX;
+    blink->tick_last = 0;
 }
 
 /**
@@ -75,29 +74,28 @@ void mulit_blink_action_set(mulit_blink_map_t blink, uint8_t action, uint16_t ti
     blink->action    = action;
     blink->time_on   = time_on;
     blink->time_off  = time_off;
-    blink->time_cnt  = 0;
+    blink->time_cnt  = MULIT_TICK_MAX;
     blink->tick_last = 0;
 }
 
 static void mulit_blink_running(mulit_blink_map_t blink)
 {
-    uint32_t tick,delt;
+    uint32_t tick, delt;
 
     tick = mulit_blink_tick_get();
     if (BLINK_TOGGLE == blink->action) {
-        if (blink->time_cnt < blink->time_on) {
+        if (blink->time_cnt >= (blink->time_on + blink->time_off)) {
             blink->ops->on();
-        }
-        else if (blink->time_cnt < (blink->time_on + blink->time_off)) {
-            blink->ops->off();
-        }
-        else {
             blink->time_cnt = 0;
-            blink->ops->on();
+            blink->set_flag = 0;
+        }
+        else if ((blink->time_cnt >= blink->time_on) && (0 == blink->set_flag)) {
+            blink->ops->off();
+            blink->set_flag = 1;
         }
 
         tick = mulit_blink_tick_get();
-        delt = (tick >= blink->tick_last) ? (tick - blink->tick_last) : (_tick_max - blink->tick_last + tick);
+        delt = (tick >= blink->tick_last) ? (tick - blink->tick_last) : (MULIT_TICK_MAX - blink->tick_last + tick);
 
         blink->time_cnt  += delt;
         blink->tick_last  = tick;
@@ -125,10 +123,12 @@ void mulit_blink_main(void)
         return;
     }
 
-    do {
+    while (blink->next) {
         mulit_blink_running(blink);
         blink = blink->next;
-    }while (blink->next);
+    }
+    /* 最后一个next为空，跳出循环后这里需要执行 */
+    mulit_blink_running(blink);
 }
 
 uint16_t mulit_blink_numbers(void)

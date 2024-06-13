@@ -4,72 +4,88 @@
 
 uint32_t tick_sim = 0;
 
-void test_blink_init(void)
-{
-    mulit_blink_init(0xFFFFFFFF);
-}
-
 void blink1_on(void)
 {
-    printf("\033[1;0m blink1 is \033[1;32m on\033[1;0m \r\n");
+    printf("\033[1;0m blink1 is \033[1;32m on, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink2_on(void)
 {
-    printf("\033[1;0m blink2 is \033[1;32m on\033[1;0m \r\n");
+    printf("\033[1;0m blink2 is \033[1;32m on, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink3_on(void)
 {
-    printf("\033[1;0m blink3 is \033[1;32m on\033[1;0m \r\n");
+    printf("\033[1;0m blink3 is \033[1;32m on, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink4_on(void)
 {
-    printf("\033[1;0m blink4 is \033[1;32m on\033[1;0m \r\n");
+    printf("\033[1;0m blink4 is \033[1;32m on, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink1_off(void)
 {
-    printf("\033[1;0m blink1 is \033[1;31m off\033[1;0m \r\n");
+    printf("\033[1;0m blink1 is \033[1;32m off, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink2_off(void)
 {
-    printf("\033[1;0m blink2 is \033[1;31m off\033[1;0m \r\n");
+    printf("\033[1;0m blink2 is \033[1;32m off, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink3_off(void)
 {
-    printf("\033[1;0m blink3 is \033[1;31m off\033[1;0m \r\n");
+    printf("\033[1;0m blink3 is \033[1;32m off, %d\033[1;0m \r\n ", tick_sim);
 }
 
 void blink4_off(void)
 {
-    printf("\033[1;0m blink4 is \033[1;31m off\033[1;0m \r\n");
+    printf("\033[1;0m blink4 is \033[1;32m off, %d\033[1;0m \r\n ", tick_sim);
 }
 
-/* clang-format off */
-mulit_blink_map_t blink_map[4] = {
-{.ops.on=blink1_on, .ops.off=blink1_off, .ops.toggle=NULL,.flag=0,.index=0,.action=BLINK_ON,.time_on=100,.time_off=100,.tick_last=0},
-{.ops.on=blink2_on, .ops.off=blink2_off, .ops.toggle=NULL,.flag=0,.index=1,.action=BLINK_OFF,.time_on=100,.time_off=100,.tick_last=0},
-{.ops.on=blink3_on, .ops.off=blink3_off, .ops.toggle=NULL,.flag=0,.index=2,.action=BLINK_TOGGLE,.time_on=100,.time_off=100,.tick_last=0},
-{.ops.on=blink4_on, .ops.off=blink4_off, .ops.toggle=NULL,.flag=0,.index=3,.action=BLINK_TOGGLE,.time_on=100,.time_off=500,.tick_last=0},
+const struct blink_ops ops1 = {
+    .on     = blink1_on,
+    .off    = blink1_off,
+    .toggle = NULL,
 };
-/* clang-format on */
-uint32_t
-mulit_blink_tick_get()
+
+const struct blink_ops ops2 = {
+    .on     = blink2_on,
+    .off    = blink2_off,
+    .toggle = NULL,
+};
+
+const struct blink_ops ops3 = {
+    .on     = blink3_on,
+    .off    = blink3_off,
+    .toggle = NULL,
+};
+
+const struct blink_ops ops4 = {
+    .on     = blink4_on,
+    .off    = blink4_off,
+    .toggle = NULL,
+};
+
+struct mulit_blink_map blink[4];
+
+uint32_t mulit_blink_tick_get()
 {
     return tick_sim;
 }
 
 void test_blink_main(void)
 {
+    mulit_blink_init(&blink[0], &ops1, BLINK_ON, 0);
+    mulit_blink_init(&blink[1], &ops2, BLINK_OFF, 0);
+    mulit_blink_init(&blink[2], &ops3, BLINK_TOGGLE, (500 << 16) | 200);
+    mulit_blink_init(&blink[3], &ops4, BLINK_TOGGLE, (1000 << 16) | 500);
+
     for (uint32_t i = 0; i < 2000; i++) {
-        tick_sim++;
         if (0 == (tick_sim % 100)) {
-            printf("\r\ntick_sim = %d\r\n", tick_sim);
-            mulit_blink_main(blink_map, 4);
+            mulit_blink_main();
         }
+        tick_sim++;
     }
 }

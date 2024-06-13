@@ -277,8 +277,7 @@ int flash_init(void)
 
 int flash_read(uint32_t offset, uint8_t* buf, uint32_t size)
 {
-    if (offset > FLASH_BYTES)
-    {
+    if (offset > FLASH_BYTES) {
         return -1;
     }
     memcpy(buf, &sim_flash[offset], size);
@@ -288,8 +287,7 @@ int flash_read(uint32_t offset, uint8_t* buf, uint32_t size)
 
 int flash_write(uint32_t offset, const uint8_t* buf, uint32_t size)
 {
-    if (offset > FLASH_BYTES)
-    {
+    if (offset > FLASH_BYTES) {
         return -1;
     }
     memcpy(&sim_flash[offset], buf, size);
@@ -299,8 +297,7 @@ int flash_write(uint32_t offset, const uint8_t* buf, uint32_t size)
 
 int flash_erase(uint32_t offset, uint32_t size)
 {
-    if (offset > FLASH_BYTES)
-    {
+    if (offset > FLASH_BYTES) {
         return -1;
     }
 
@@ -315,8 +312,7 @@ uint16_t flash_crc16(uint16_t init_val, uint8_t* pdata, uint32_t len)
     register uint8_t  idx;
 
     crc16 = init_val;
-    for (i = 0; i < len; i++)
-    {
+    for (i = 0; i < len; i++) {
         idx   = ((uint8_t)crc16) ^ (*pdata++);
         crc16 = (crc16 >> 8) ^ crc16_table[idx];
     }
@@ -347,18 +343,15 @@ int test_eb_write(void)
     eb_err_t    ret;
     uint32_t    cnt     = 0;
     eb_frame_t* p_frame = eb_get_frame();
-    for (int i = 0; i < 100; i++)
-    {
+    for (int i = 0; i < 100; i++) {
         cnt++;
         ret = eb_write_data(p_frame, (const char*)&cnt, sizeof(cnt));
-        if (ret)
-        {
+        if (ret) {
             break;
         }
     }
 
-    if (ret)
-    {
+    if (ret) {
         printf("write failed with cnt=%d", cnt);
         return ret;
     }
@@ -375,8 +368,7 @@ int test_eb_read(void)
 
     ret = eb_read_data(p_frame, (char*)&cnt, sizeof(cnt), &actual_len);
 
-    if (ret)
-    {
+    if (ret) {
         printf("read failed with ret=%d", ret);
         return ret;
     }
