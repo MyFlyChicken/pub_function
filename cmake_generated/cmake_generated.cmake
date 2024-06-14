@@ -11,7 +11,7 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem/mr_mem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/device_driver/ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/func/mulit_blink.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/mulit/mulit_blink.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_filter.c

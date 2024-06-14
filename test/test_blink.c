@@ -1,5 +1,5 @@
 #include "test.h"
-#include "../func/mulit_blink.h"
+#include "../mulit/mulit_blink.h"
 #include <stdint.h>
 #include <stdio.h>
 
