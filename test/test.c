@@ -11,4 +11,5 @@ void test_main(void)
     test_async();
     test_polling();
     test_func_queue();
+    test_key();
 }

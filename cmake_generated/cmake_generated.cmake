@@ -12,7 +12,9 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/device_driver/ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mulit/mulit_blink.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/mulit/mulit_key.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_key.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eb.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_filter.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_c_language.c
@@ -44,6 +46,7 @@ set(include_c_DIRS ${include_c_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/async_work
     ${CMAKE_CURRENT_SOURCE_DIR}/polling/inc
     ${CMAKE_CURRENT_SOURCE_DIR}/func
+    ${CMAKE_CURRENT_SOURCE_DIR}/mulit
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 message(${include_c_DIRS})

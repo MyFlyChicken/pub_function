@@ -40,6 +40,7 @@ void test_ee_device(void);
 void test_async(void);
 void test_polling(void);
 void test_func_queue(void);
+void test_key(void);
 /* ----------------------- Extern function ----------------------------------*/
 
 /* ----------------------- End ----------------------------------------------*/

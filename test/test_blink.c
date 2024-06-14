@@ -88,7 +88,7 @@ void test_blink_main(void)
 
     for (uint32_t i = 0; i < 2100; i++) {
         if (0 == (tick_sim % 100)) {
-            mulit_blink_main();
+            mulit_blink_process();
         }
         tick_sim++;
     }
