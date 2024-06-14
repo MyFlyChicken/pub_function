@@ -24,7 +24,8 @@ extern "C" {
 #include "../UnityTesting/src/unity.h"
 
 /* ----------------------- Defines ------------------------------------------*/
-
+#define TEST_FUNCTION_BEGIN() printf("\n\n===>>>%s begin<<<===\n", __FUNCTION__)
+#define TEST_FUNCTION_END()   printf("===>>>%s end\n\n", __FUNCTION__)
 /* ----------------------- Type definitions ---------------------------------*/
 
 /* ----------------------- Extern variable ---------------------------------*/

@@ -1,3 +1,4 @@
+#include "test.h"
 #include "../func/mulit_blink.h"
 #include <stdint.h>
 #include <stdio.h>
@@ -77,15 +78,19 @@ uint32_t mulit_blink_tick_get()
 
 void test_blink_main(void)
 {
+    TEST_FUNCTION_BEGIN();
+    printf("--->>>blink num = %u\n", mulit_blink_numbers());
     mulit_blink_init(&blink[0], &ops1, BLINK_ON, 0);
     mulit_blink_init(&blink[1], &ops2, BLINK_OFF, 0);
-    mulit_blink_init(&blink[2], &ops3, BLINK_TOGGLE, (500 << 16) | 200);
-    mulit_blink_init(&blink[3], &ops4, BLINK_TOGGLE, (1000 << 16) | 500);
+    mulit_blink_init(&blink[2], &ops3, BLINK_TOGGLE, MULIT_TIME_SET(500, 200));
+    mulit_blink_init(&blink[3], &ops4, BLINK_TOGGLE, MULIT_TIME_SET(1000, 500));
+    printf("--->>>blink num = %u\n", mulit_blink_numbers());
 
-    for (uint32_t i = 0; i < 2000; i++) {
+    for (uint32_t i = 0; i < 2100; i++) {
         if (0 == (tick_sim % 100)) {
             mulit_blink_main();
         }
         tick_sim++;
     }
+    TEST_FUNCTION_END();
 }

@@ -379,8 +379,10 @@ int test_eb_read(void)
 
 void test_eb_main(void)
 {
+    TEST_FUNCTION_BEGIN();
     test_flash_init();
     test_eb_init();
     test_eb_write();
     test_eb_read();
+    TEST_FUNCTION_END();
 }

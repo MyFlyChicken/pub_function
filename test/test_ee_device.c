@@ -77,6 +77,7 @@ void test_ee_device(void)
     ee_device_t      dev_find;
     char             buffer[6];
 
+    TEST_FUNCTION_BEGIN();
     ee_device_register(&dev1, &obj, &ops, NULL);
     ee_device_register(&dev2, &obj2, &ops, NULL);
 
@@ -99,4 +100,5 @@ void test_ee_device(void)
     dev_find->ops->read(dev_find, 0, buffer, 6);
     dev_find->ops->write(dev_find, 0, buffer, 6);
     dev_find->ops->control(dev_find, 0, NULL);
+    TEST_FUNCTION_END();
 }

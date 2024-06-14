@@ -1,3 +1,4 @@
+#include "test.h"
 #include "../polling/inc/polling.h"
 
 #include <stdlib.h>
@@ -58,10 +59,12 @@ poll_task_register("p3", task_printf3, 300);
 
 void test_polling(void)
 {
+    TEST_FUNCTION_BEGIN();
     poll_module_init();
 
     for (int i = 0; i < 1000; i++) {
         poll_process();
         tick++;
     }
+    TEST_FUNCTION_END();
 }

@@ -64,6 +64,7 @@ void test_struct_assign(void)
         .height = 160,
         .weight = 200,
     };
+    TEST_FUNCTION_BEGIN();
     printf("zhangsan age = %d, height = %d weight = %d\r\n", zhangsan.age, zhangsan.height, zhangsan.weight);
     printf("lisi = %d, height = %d weight = %d\r\n", lisi.age, lisi.height, lisi.weight);
     printf("zhangsan assign lisi\r\n");
@@ -72,4 +73,5 @@ void test_struct_assign(void)
     printf("lisi = %d, height = %d weight = %d\r\n", lisi.age, lisi.height, lisi.weight);
 
     test_eq();
+    TEST_FUNCTION_END();
 }

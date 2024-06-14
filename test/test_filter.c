@@ -66,13 +66,11 @@ void tearDown(void)
         Unity.CurrentTestName       = #TestFunc;   \
         Unity.CurrentTestLineNumber = TestLineNum; \
         Unity.NumberOfTests++;                     \
-        if (TEST_PROTECT())                        \
-        {                                          \
+        if (TEST_PROTECT()) {                      \
             setUp();                               \
             TestFunc();                            \
         }                                          \
-        if (TEST_PROTECT())                        \
-        {                                          \
+        if (TEST_PROTECT()) {                      \
             tearDown();                            \
         }                                          \
         UnityConcludeTest();                       \
@@ -103,8 +101,7 @@ void test_filter3(void)
 void test_filter4(void)
 {
     int16_t tmp;
-    for (int16_t i = 0; i < 10; i++)
-    {
+    for (int16_t i = 0; i < 10; i++) {
         tmp = filter4();
         printf("raw dat:%d\r\n", tmp);
     }
@@ -121,10 +118,12 @@ void test_filter5(void)
 
 void test_filter_main(void)
 {
+    TEST_FUNCTION_BEGIN();
     UnityBegin("test/test.c");
     RUN_TEST(test_filter1, 80);
     RUN_TEST(test_filter2, 88);
     RUN_TEST(test_filter3, 95);
     RUN_TEST(test_filter4, 90);
     RUN_TEST(test_filter5, 97);
+    TEST_FUNCTION_END();
 }
