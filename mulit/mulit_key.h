@@ -1,28 +1,40 @@
 #ifndef MULIT_KEY_H
 #define MULIT_KEY_H
 
+#include <cstdint>
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
-#define LOG_PRINT(...) 
+#include <stdint.h>
 
-#define ASSERT(x)   if (!(x))   \
-                    {           \
-                        LOG_PRINT("Assert failed, %s, %s", __FILE__, __LINE__); \
-                        while (1);\
-                    }
+#define MULIT_KEY_PRINTF (0)
+#define MULIT_KEY_ASSERT (0)
+
+#if MULIT_KEY_PRINTF
+#define LOG_PRINT printf
+#else
+#define LOG_PRINT(...)
+#endif
+
+#if MULIT_KEY_ASSERT
+#define ASSERT(x)                                                 \
+    if (!(x)) {                                                   \
+        LOG_PRINT("Assert failed, %s, %u\n", __FILE__, __LINE__); \
+        while (1)                                                 \
+            ;                                                     \
+    }
+#else
+#define ASSERT(x)
+#endif
 
 #define KEY_DETECTION_ADC (0U)
 #define KEY_DETECTION_DIG (1U)
 
-#define KEY_PHY_DEFAULT   (KEY_DETECTION_DIG)
+#define KEY_PHY_DEFAULT (KEY_DETECTION_DIG)
 
 #if (KEY_PHY_DEFAULT == KEY_DETECTION_ADC)
 #define KEY_ADC_DELT (62U) /* 0.05 / 3.3 * 4096 = 62 按键判断误差在0.05V */
-#elif (KEY_PHY_DEFAULT == KEY_DETECTION_DIG)
-#define KEY_ACTIVE_LEVEL (1U)
 #endif
 
 #define KEY_SCAN_TICKS   (5U) //ms
@@ -30,8 +42,7 @@ extern "C"
 #define KEY_SHORT_TICKS  (100 / KEY_SCAN_TICKS)
 #define KEY_LONG_TICKS   (1000 / KEY_SCAN_TICKS)
 
-typedef enum
-{
+typedef enum {
     KEY_PRESS_DOWN = 0,
     KEY_PRESS_UP,
     KEY_PRESS_REPEAT,
@@ -43,21 +54,32 @@ typedef enum
     KEY_NONE_PRESS
 } key_press_event_e;
 
-typedef struct
-{
-    unsigned short ticks;
-    unsigned char  repeat     : 4;
-    unsigned char  event      : 4;
-    unsigned char  state      : 4;
-    unsigned char  filter_cnt : 4;
-    unsigned long active_level;
-    unsigned long button_level;
-} mulit_key_t;
+/* 按键回调函数 */
+typedef void (*key_callback)(void*);
+/* 按键检测函数 */
+typedef uint32_t (*key_raw_value)(void);
 
-/* 按键检测处理函数 */
-typedef void (*key_event_deal)(void);
-/* 按键周期扫描函数 */
-void mulit_key_scan(unsigned long input, mulit_key_t* handle);    
+struct mulit_key {
+    struct
+    {
+        uint16_t ticks;
+        uint8_t  repeat     : 4;
+        uint8_t  event      : 4;
+        uint8_t  state      : 4;
+        uint8_t  filter_cnt : 4;
+        uint32_t active_level;
+        uint32_t button_level;
+    } key;
+
+    key_raw_value     value;
+    key_callback      cbk;
+    struct mulit_key* next;
+};
+typedef struct mulit_key* mulit_key_t;
+
+void     mulit_key_init(mulit_key_t key, uint32_t active_level, key_raw_value value, key_callback cbk);
+uint16_t mulit_key_numbers(void);
+void     mulit_key_process(void);
 
 #ifdef __cplusplus
 }

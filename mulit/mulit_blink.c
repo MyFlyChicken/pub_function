@@ -131,7 +131,7 @@ static void mulit_blink_running(mulit_blink_map_t blink)
  * 
  * @details 
  */
-void mulit_blink_main(void)
+void mulit_blink_process(void)
 {
     mulit_blink_map_t blink = _mulit_blink_head;
 

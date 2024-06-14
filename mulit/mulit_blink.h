@@ -44,7 +44,7 @@ uint16_t mulit_blink_numbers(void);
 
 void mulit_blink_init(mulit_blink_map_t blink, const struct blink_ops* ops, uint8_t action, uint32_t time);
 void mulit_blink_action_set(mulit_blink_map_t blink, uint8_t action, uint16_t time_on, uint16_t time_off);
-void mulit_blink_main();
+void mulit_blink_process();
 #ifdef __cplusplus
 }
 #endif
