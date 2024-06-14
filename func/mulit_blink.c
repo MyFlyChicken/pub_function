@@ -23,6 +23,9 @@
 
 mulit_blink_map_t _mulit_blink_head = NULL;
 
+static void mulit_blink_time_update(mulit_blink_map_t blink);
+static void mulit_blink_running(mulit_blink_map_t blink);
+
 __WEAK uint32_t mulit_blink_tick_get(void)
 {
     return 0;
@@ -58,6 +61,7 @@ void mulit_blink_init(mulit_blink_map_t blink, const struct blink_ops* ops, uint
     blink->time_off  = time & 0xFFFF;
     blink->time_cnt  = MULIT_TICK_MAX;
     blink->tick_last = 0;
+    blink->set_flag  = 0;
 }
 
 /**
@@ -76,13 +80,28 @@ void mulit_blink_action_set(mulit_blink_map_t blink, uint8_t action, uint16_t ti
     blink->time_off  = time_off;
     blink->time_cnt  = MULIT_TICK_MAX;
     blink->tick_last = 0;
+    blink->set_flag  = 0;
 }
 
-static void mulit_blink_running(mulit_blink_map_t blink)
+/**
+ * @brief 更新blink的内部成员，用于判断翻转时间
+ * @param [in] blink 
+ * 
+ * @details 
+ */
+static void mulit_blink_time_update(mulit_blink_map_t blink)
 {
     uint32_t tick, delt;
 
     tick = mulit_blink_tick_get();
+    delt = (tick >= blink->tick_last) ? (tick - blink->tick_last) : (MULIT_TICK_MAX - blink->tick_last + tick);
+
+    blink->time_cnt  += delt;
+    blink->tick_last  = tick;
+}
+
+static void mulit_blink_running(mulit_blink_map_t blink)
+{
     if (BLINK_TOGGLE == blink->action) {
         if (blink->time_cnt >= (blink->time_on + blink->time_off)) {
             blink->ops->on();
@@ -93,18 +112,15 @@ static void mulit_blink_running(mulit_blink_map_t blink)
             blink->ops->off();
             blink->set_flag = 1;
         }
-
-        tick = mulit_blink_tick_get();
-        delt = (tick >= blink->tick_last) ? (tick - blink->tick_last) : (MULIT_TICK_MAX - blink->tick_last + tick);
-
-        blink->time_cnt  += delt;
-        blink->tick_last  = tick;
+        mulit_blink_time_update(blink);
     }
-    else if (BLINK_ON == blink->action) {
+    else if ((BLINK_ON == blink->action) && (0 == blink->set_flag)) {
         blink->ops->on();
+        blink->set_flag = 1;
     }
-    else if (BLINK_OFF == blink->action) {
+    else if ((BLINK_OFF == blink->action) && (0 == blink->set_flag)) {
         blink->ops->off();
+        blink->set_flag = 1;
     }
 }
 
@@ -133,7 +149,18 @@ void mulit_blink_main(void)
 
 uint16_t mulit_blink_numbers(void)
 {
-    if (!_mulit_blink_head) {
+    uint16_t          num   = 0;
+    mulit_blink_map_t blink = _mulit_blink_head;
+
+    if (!blink) {
         return 0;
     }
+
+    num = 1;
+    while (blink->next) {
+        num++;
+        blink = blink->next;
+    }
+
+    return num;
 }
