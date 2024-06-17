@@ -1,6 +1,6 @@
 #include "frame_rcv.h"
 
-void ring_buf_deal_main(frame_rcv_t* p_frame_rcv, unsigned char data)
+void frame_rcv_process(frame_rcv_t* p_frame_rcv, unsigned char data)
 {
     ASSERT(p_frame_rcv);
     ASSERT(p_frame_rcv->dest);
@@ -14,49 +14,40 @@ void ring_buf_deal_main(frame_rcv_t* p_frame_rcv, unsigned char data)
     unsigned char  val       = 0;
     unsigned short frame_len = 0; /* 由数据得到的帧长度 */
 
-    switch (p_frame_rcv->steup)
-    {
+    switch (p_frame_rcv->steup) {
     case PARSE_FSM_HEAD:
         ret = p_frame_rcv->frame_header(data);
-        if (0 == ret)
-        {
+        if (0 == ret) {
             p_frame_rcv->dest[p_frame_rcv->dest_len++] = data;
         }
-        else if (1 == ret)
-        {
+        else if (1 == ret) {
             p_frame_rcv->dest[p_frame_rcv->dest_len++] = data;
             p_frame_rcv->steup                         = PARSE_FSM_LEN;
         }
-        else
-        {
+        else {
             LOG_PRINT("Data is invalid of PARSE_FSM_HEAD");
             p_frame_rcv->dest_len = 0;
         }
         break;
     case PARSE_FSM_LEN:
         ret = p_frame_rcv->frame_length(data, &frame_len);
-        if (0 == ret)
-        {
+        if (0 == ret) {
             p_frame_rcv->dest[p_frame_rcv->dest_len++] = data;
         }
-        else if (1 == ret)
-        {
+        else if (1 == ret) {
             p_frame_rcv->dest[p_frame_rcv->dest_len++] = data;
             if ((frame_len > (*p_frame_rcv->max_frame_len))
-                || (frame_len < (*p_frame_rcv->min_frame_len)))
-            {
+                || (frame_len < (*p_frame_rcv->min_frame_len))) {
                 LOG_PRINT("Frame len is invalid of PARSE_FSM_LEN");
                 p_frame_rcv->dest_len = 0;
                 p_frame_rcv->steup    = PARSE_FSM_HEAD;
             }
-            else
-            {
+            else {
                 p_frame_rcv->steup     = PARSE_FSM_END;
                 p_frame_rcv->frame_len = frame_len;
             }
         }
-        else
-        {
+        else {
             LOG_PRINT("Data is invalid of PARSE_FSM_LEN");
             p_frame_rcv->dest_len = 0;
             p_frame_rcv->steup    = PARSE_FSM_HEAD;
@@ -64,8 +55,7 @@ void ring_buf_deal_main(frame_rcv_t* p_frame_rcv, unsigned char data)
         break;
     case PARSE_FSM_END:
         p_frame_rcv->dest[p_frame_rcv->dest_len++] = data;
-        if (p_frame_rcv->dest_len >= p_frame_rcv->frame_len)
-        {
+        if (p_frame_rcv->dest_len >= p_frame_rcv->frame_len) {
             p_frame_rcv->fsm_end(p_frame_rcv->dest, p_frame_rcv->dest_len);
         }
         break;

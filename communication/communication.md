@@ -1,5 +1,5 @@
 # 通讯模块
-## comm_buffer
+## data_queue
 - 用于数据缓冲的管理，接收，发送的缓冲区可以用该模块管理
 
 ## frame_rev

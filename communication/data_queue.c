@@ -1,4 +1,4 @@
-#include "comm_buffer.h"
+#include "data_queue.h"
 
 #ifndef NULL
 #define NULL 0
@@ -63,10 +63,8 @@ data_item_t* date_queue_get_idle(data_queue_t* p_data_queue,
     ASSERT(p_data_queue);
     unsigned char i;
 
-    for (i = 0; i < *p_data_queue->group; i++)
-    {
-        if (0 == p_data_queue->item[i].busy_flag)
-        {
+    for (i = 0; i < *p_data_queue->group; i++) {
+        if (0 == p_data_queue->item[i].busy_flag) {
             p_data_queue->item[i].busy_flag = 1;
             return ((data_item_t*)&p_data_queue->item[i]);
         }
@@ -74,10 +72,8 @@ data_item_t* date_queue_get_idle(data_queue_t* p_data_queue,
 
     SEM_TAKE_INF(p_data_queue->sem, timeout);
 
-    for (i = 0; i < *p_data_queue->group; i++)
-    {
-        if (0 == p_data_queue->item[i].busy_flag)
-        {
+    for (i = 0; i < *p_data_queue->group; i++) {
+        if (0 == p_data_queue->item[i].busy_flag) {
             p_data_queue->item[i].busy_flag = 1;
             return ((data_item_t*)&p_data_queue->item[i]);
         }
@@ -87,7 +83,7 @@ data_item_t* date_queue_get_idle(data_queue_t* p_data_queue,
 
 void date_item_release(data_item_t* buffer)
 {
-    RT_ASSERT(buffer);
+    ASSERT(buffer);
 
     buffer->curr_len  = 0;
     buffer->busy_flag = 0;
