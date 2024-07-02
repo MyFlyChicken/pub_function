@@ -1,7 +1,6 @@
 #ifndef MULIT_KEY_H
 #define MULIT_KEY_H
 
-#include <cstdint>
 #ifdef __cplusplus
 extern "C" {
 #endif
