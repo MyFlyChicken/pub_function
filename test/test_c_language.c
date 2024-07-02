@@ -45,6 +45,31 @@ void test_eq(void)
     printf("%f %f %f %f %f \r\n", a1, a2, b0, b1, b2);
 }
 
+void test_struct_conv(void)
+{
+    struct student {
+        uint8_t age;
+        uint8_t height;
+        uint8_t weight;
+    };
+
+    struct class {
+        struct student zhangsan;
+        uint8_t        classroom;
+    };
+
+    struct class class6;
+    struct student* zhangsan = (struct student*)&class6;
+
+    class6.classroom       = 10;
+    class6.zhangsan.age    = 10;
+    class6.zhangsan.height = 20;
+    class6.zhangsan.weight = 30;
+
+    printf("classroom zhangsan %d %d %d\n", class6.zhangsan.age, class6.zhangsan.height, class6.zhangsan.weight);
+    printf("zhangsan %d %d %d\n", zhangsan->age, zhangsan->height, zhangsan->weight);
+}
+
 //测试C语言结构体直接赋值
 void test_struct_assign(void)
 {
@@ -73,5 +98,6 @@ void test_struct_assign(void)
     printf("lisi = %d, height = %d weight = %d\r\n", lisi.age, lisi.height, lisi.weight);
 
     test_eq();
+    test_struct_conv();
     TEST_FUNCTION_END();
 }
