@@ -34,8 +34,7 @@ void date_item_init(data_item_t*          p_item,
  * @param [in] sem 
  * 
  * @details 
- */
-void date_queue_init(data_queue_t*        p_date_queue,
+ */void date_queue_init(data_queue_t*        p_date_queue,
                      data_item_t*         p_data_item,
                      const unsigned char* group,
                      void*                sem)
@@ -44,7 +43,7 @@ void date_queue_init(data_queue_t*        p_date_queue,
     ASSERT(p_data_item);
     ASSERT(group);
 
-    p_date_queue->item  = p_date_queue;
+    p_date_queue->item  = p_data_item;
     p_date_queue->group = group;
     p_date_queue->sem   = sem;
 }
