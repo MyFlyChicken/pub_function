@@ -27,6 +27,7 @@ mi_thread_t mi_thread_creat(const char* name,
                             mi_u32_t stack_size,
                             mi_u8_t  priority);
 
+void    os_idle_hook_regist(idle_hook hook);
 mi_bool os_thread_start(mi_thread_t thread);
 mi_bool os_thread_stop(mi_thread_t thread);
 

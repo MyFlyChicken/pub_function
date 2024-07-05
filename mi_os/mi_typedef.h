@@ -13,6 +13,8 @@ typedef signed char  mi_s8_t;
 typedef signed short mi_s16_t;
 typedef signed long  mi_s32_t;
 
+typedef void (*idle_hook)(void);
+
 typedef enum {
     mi_true  = 1,
     mi_false = !mi_true
