@@ -24,39 +24,41 @@
 #include "../mf_log.h"
 
 static mi_u32_t _thread_ready;   //bit置1表示对应位的线程就绪，可以进行执行
-static mi_u32_t _thread_stop;    //bit置1表示对应位的线程暂停
 static mi_u32_t _thread_delayed; //bit置1表示对应位的线程进行了延时
 
 static idle_hook _idle_hook[THREAD_CALLBACKS] = {0};
 
-struct mi_thread _thread[THREAD_MAXS];
+static mi_thread_t _thread[THREAD_MAXS];
 
 mi_thread_t _thread_curr;
 mi_thread_t _thread_next;
 
 //线程创建函数
-mi_thread_t os_thread_creat(const char* name,
-                            void (*entry)(void* parameter),
-                            void*       parameter,
-                            char* const stack,
-                            mi_u32_t    stack_size,
-                            mi_u8_t     priority)
+mi_bool mi_thread_creat(mi_thread_t thread,
+                        const char* name,
+                        void (*entry)(void* parameter),
+                        void*       parameter,
+                        char* const stack,
+                        mi_u32_t    stack_size,
+                        mi_u8_t     priority)
 {
     MF_ASSERT(priority < THREAD_MAXS);
 
-    _thread[priority].name       = name;
-    _thread[priority].prio       = priority;
-    _thread[priority].stack      = stack;
-    _thread[priority].entry      = entry;
-    _thread[priority].stack_size = stack_size;
+    _thread[priority] = thread;
 
-    _thread[priority].timeout = 0;
+    _thread[priority]->name       = name;
+    _thread[priority]->prio       = priority;
+    _thread[priority]->stack      = stack;
+    _thread[priority]->entry      = entry;
+    _thread[priority]->stack_size = stack_size;
 
-    return &_thread[priority];
+    _thread[priority]->timeout = 0;
+
+    return mi_true;
 }
 
 //线程启动
-mi_bool os_thread_start(mi_thread_t thread)
+mi_bool mi_thread_start(mi_thread_t thread)
 {
     mi_u32_t* sp;
     mi_u32_t* stk_limit;
@@ -107,15 +109,16 @@ mi_bool os_thread_start(mi_thread_t thread)
 }
 
 //开启调度
-void os_thread_sched(void)
+void mi_thread_sched(void)
 {
     /* choose the next thread to execute... */
     mi_thread_t next;
+
     if (_thread_ready == 0U) { /* idle condition? */
-        next = &_thread[0];    /* the idle thread */
+        next = _thread[0];     /* the idle thread */
     }
     else {
-        next = &_thread[LOG2(_thread_ready)];
+        next = _thread[LOG2(_thread_ready)];
         MF_ASSERT(next != (mi_thread_t)0);
     }
 
@@ -127,9 +130,10 @@ void os_thread_sched(void)
 }
 
 //空闲线程
-void os_thread_idle(void* parameter)
+void mi_thread_idle(void* parameter)
 {
     mi_u8_t i = 0;
+
     for (i = 0; i < THREAD_CALLBACKS; i++) {
         if ((NULL != _idle_hook[i])) {
             _idle_hook[i]();
@@ -138,7 +142,7 @@ void os_thread_idle(void* parameter)
 }
 
 //空闲线程回调函数
-void os_idle_hook_regist(idle_hook hook)
+void mi_idle_hook_regist(idle_hook hook)
 {
     mi_u8_t i = 0;
 
@@ -152,11 +156,13 @@ void os_idle_hook_regist(idle_hook hook)
 //系统开始运行
 void os_run(void)
 {
-    mi_thread_t thread;
+    static char             idle_stack[IDLE_HOOK_STACK_SIZE];
+    static struct mi_thread thread;
 
-    static char idle_stack[512];
-    thread = os_thread_creat("idle", os_thread_idle, 0, idle_stack, 512, 0);
-    os_thread_start(thread);
+    __disable_irq();
+    mi_thread_creat(&thread, "idle", mi_thread_idle, 0, idle_stack, sizeof(idle_stack), 0);
+    mi_thread_start(&thread);
+    __enable_irq();
 }
 
 //系统时基
@@ -170,10 +176,6 @@ void mi_os_tick(void)
         MF_ASSERT((t != (mi_thread_t)0) && (t->timeout != 0U));
 
         bit = (1U << (t->prio - 1U));
-        if (_thread_stop & bit) {
-            workingSet &= ~bit;
-            continue;
-        }
         --t->timeout;
         if (t->timeout == 0U) {
             _thread_ready   |= bit;  /* insert to set */
@@ -187,17 +189,19 @@ void mi_os_tick(void)
 void mi_delay(mi_u32_t ticks)
 {
     mi_u32_t bit;
-    INTERRUPT_DISABLE();
+
+    __disable_irq();
 
     /* never call OS_delay from the idleThread */
-    MF_ASSERT(_thread_curr != &_thread[0]);
+    MF_ASSERT(_thread_curr != _thread[0]);
 
     _thread_curr->timeout  = ticks;
     bit                    = (1U << (_thread_curr->prio - 1U));
     _thread_ready         &= ~bit;
     _thread_delayed       |= bit;
-    os_thread_sched();
-    INTERRUPT_ENABLE();
+
+    mi_thread_sched();
+    __enable_irq();
 }
 
 /* inline assembly syntax for IAR ARM */

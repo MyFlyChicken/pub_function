@@ -20,16 +20,16 @@ struct mi_thread {
 };
 typedef struct mi_thread* mi_thread_t;
 
-mi_thread_t mi_thread_creat(const char* name,
-                            void (*entry)(void* parameter),
-                            void*    parameter,
-                            char*    stack,
-                            mi_u32_t stack_size,
-                            mi_u8_t  priority);
+mi_bool mi_thread_creat(mi_thread_t thread,
+                        const char* name,
+                        void (*entry)(void* parameter),
+                        void*    parameter,
+                        char*    stack,
+                        mi_u32_t stack_size,
+                        mi_u8_t  priority);
 
-void    os_idle_hook_regist(idle_hook hook);
-mi_bool os_thread_start(mi_thread_t thread);
-mi_bool os_thread_stop(mi_thread_t thread);
+void    mi_idle_hook_regist(idle_hook hook);
+mi_bool mi_thread_start(mi_thread_t thread);
 
 void mi_delay(mi_u32_t ticks);
 

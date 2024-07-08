@@ -11,7 +11,8 @@ extern "C" {
 /* 空闲线程回调函数 */
 #define THREAD_IDLE_CBK (1)
 
-#define THREAD_CALLBACKS (3)
+#define THREAD_CALLBACKS     (3)
+#define IDLE_HOOK_STACK_SIZE (512)
 
 #ifdef __cplusplus
 }
