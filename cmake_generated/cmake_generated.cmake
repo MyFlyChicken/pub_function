@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.22)
 # Sources
 set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo/filter_algo.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/algorithm/filter/filter_algo.c
     ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem/mr_mem.c
     ${CMAKE_CURRENT_SOURCE_DIR}/device_driver/ee_device.c
     ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
@@ -34,7 +34,7 @@ set(sources_SRCS ${sources_SRCS}
 message(${CMAKE_CURRENT_SOURCE_DIR})
 # Include directories
 set(include_c_DIRS ${include_c_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/filter_algo
+    ${CMAKE_CURRENT_SOURCE_DIR}/algorithm/filter
     ${CMAKE_CURRENT_SOURCE_DIR}/func
     ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem
     ${CMAKE_CURRENT_SOURCE_DIR}/device_driver

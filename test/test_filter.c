@@ -18,7 +18,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "../filter_algo/filter_algo.h"
+#include "../algorithm/filter/filter_algo.h"
 /* ----------------------- Platform includes --------------------------------*/
 
 /* ----------------------- Defines ------------------------------------------*/
