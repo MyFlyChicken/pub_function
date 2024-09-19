@@ -70,6 +70,19 @@ void test_struct_conv(void)
     printf("zhangsan %d %d %d\n", zhangsan->age, zhangsan->height, zhangsan->weight);
 }
 
+void test_bp_goto(void)
+{
+    //即使在if条件不满足，goto语句仍然可以跳转到label0，且不再执行else后边语句
+    goto label0;
+    if (0) {
+    label0:
+        printf("this is label0\n");
+    }
+    else {
+        printf("this is nolabel0\n");
+    }
+}
+
 //测试C语言结构体直接赋值
 void test_struct_assign(void)
 {
@@ -99,5 +112,6 @@ void test_struct_assign(void)
 
     test_eq();
     test_struct_conv();
+    test_bp_goto();
     TEST_FUNCTION_END();
 }
