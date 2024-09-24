@@ -1,5 +1,5 @@
 #include "test.h"
-#include "../polling/inc/polling.h"
+#include "../os/polling/inc/polling.h"
 
 #include <stdlib.h>
 #include <stdio.h>

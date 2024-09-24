@@ -7,12 +7,19 @@ cmake_minimum_required(VERSION 3.22)
 # Sources
 set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/main.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/algorithm/filter/filter_algo.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem/mr_mem.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/device_driver/ee_device.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/func/fifo.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/mulit/mulit_blink.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/mulit/mulit_key.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/algorithm/filter/filter_algo.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/mr_mem/mr_mem.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/device_driver/ee_device.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/func/fifo.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/mulit/mulit_blink.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/mulit/mulit_key.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/flash/eb.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/async_work/async_work.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/func/func_queue.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c/circle.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c/rect.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c/shape.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/os/polling/src/polling.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_key.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_eb.c
@@ -24,29 +31,28 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_async.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_polling.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_func_queue.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_oop_c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/flash/eb.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/async_work/async_work.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/polling/src/polling.c
-    ${CMAKE_CURRENT_SOURCE_DIR}/func/func_queue.c
+    
 )
 
 message(${CMAKE_CURRENT_SOURCE_DIR})
 # Include directories
 set(include_c_DIRS ${include_c_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/algorithm/filter
-    ${CMAKE_CURRENT_SOURCE_DIR}/func
-    ${CMAKE_CURRENT_SOURCE_DIR}/mr_mem
-    ${CMAKE_CURRENT_SOURCE_DIR}/device_driver
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/algorithm/filter
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/func
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/mr_mem
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/device_driver
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/flash/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/flash
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/async_work
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/polling/inc
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/func
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/mulit
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c
     ${CMAKE_CURRENT_SOURCE_DIR}/test
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/examples
-    ${CMAKE_CURRENT_SOURCE_DIR}/flash/inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/flash
-    ${CMAKE_CURRENT_SOURCE_DIR}/async_work
-    ${CMAKE_CURRENT_SOURCE_DIR}/polling/inc
-    ${CMAKE_CURRENT_SOURCE_DIR}/func
-    ${CMAKE_CURRENT_SOURCE_DIR}/mulit
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 message(${include_c_DIRS})

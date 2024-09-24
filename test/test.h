@@ -41,6 +41,7 @@ void test_async(void);
 void test_polling(void);
 void test_func_queue(void);
 void test_key(void);
+void test_oop_c(void);
 /* ----------------------- Extern function ----------------------------------*/
 
 /* ----------------------- End ----------------------------------------------*/

@@ -14,7 +14,7 @@
  * </table>
  */
 
-#include "public/public.h"
+#include "codebrick/public/public.h"
 #include <stdio.h>
 #include "test/test.h"
 

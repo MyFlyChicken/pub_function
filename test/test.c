@@ -12,4 +12,5 @@ void test_main(void)
     test_polling();
     test_func_queue();
     test_key();
+    test_oop_c();
 }
