@@ -32,6 +32,7 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_polling.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_func_queue.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_oop_c.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_c11_generic.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
     
 )

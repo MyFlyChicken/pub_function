@@ -42,6 +42,7 @@ void test_polling(void);
 void test_func_queue(void);
 void test_key(void);
 void test_oop_c(void);
+void test_c11_generic(void);
 /* ----------------------- Extern function ----------------------------------*/
 
 /* ----------------------- End ----------------------------------------------*/

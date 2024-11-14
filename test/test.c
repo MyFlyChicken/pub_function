@@ -13,4 +13,5 @@ void test_main(void)
     test_func_queue();
     test_key();
     test_oop_c();
+    test_c11_generic();
 }
