@@ -83,6 +83,18 @@ void test_bp_goto(void)
     }
 }
 
+void test_test1(void)
+{
+#include "./test1/test1.h"
+    printf("test1 data = %d, %d, %d\n", data[0], data[1], data[2]);
+}
+
+void test_test2(void)
+{
+#include "./test2/test2.h"
+    printf("test2 data = %d, %d, %d\n", data[0], data[1], data[2]);
+}
+
 //测试C语言结构体直接赋值
 void test_struct_assign(void)
 {
@@ -113,5 +125,7 @@ void test_struct_assign(void)
     test_eq();
     test_struct_conv();
     test_bp_goto();
+    test_test1();
+    test_test2();
     TEST_FUNCTION_END();
 }
