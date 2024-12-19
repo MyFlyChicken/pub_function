@@ -1,0 +1,6 @@
+[submodule "UnityTesting"]
+	path = UnityTesting
+	url = git@github.com:ThrowTheSwitch/Unity.git
+[submodule "eventos_copy"]
+	path = eventos_copy
+	url = git@github.com:MyFlyChicken/eventos-copy.git
