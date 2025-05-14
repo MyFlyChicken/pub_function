@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -g
 TARGET = observer_example
-SRCS = example.c observer.c
+SRCS = example.c observer.c observer_platform.c
 OBJS = $(SRCS:.c=.o)
 
 $(TARGET): $(OBJS)
