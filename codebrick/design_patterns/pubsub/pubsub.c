@@ -1,7 +1,7 @@
 /**
  * @file pubsub.c
  * @author yuyf ()
- * @brief 
+ * @brief 需要扩展为异步
  * @version 0.1
  * @date 2025-05-14
  * 

@@ -55,10 +55,10 @@ extern "C"
     {
         union
         {
-            uint64_t id;
+            uint32_t id;
             char* name;
         } topic;
-        TOPIC_TYPE_E type;
+        TOPIC_TYPE_E type; // 程序根据类型选择主题的内容（id or name）
         SubscriberNode* subscribers;
         struct TopicNode* next;
     } TopicNode;
