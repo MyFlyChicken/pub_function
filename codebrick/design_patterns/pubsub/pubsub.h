@@ -32,17 +32,33 @@ extern "C"
 #include <stdint.h>
 #include <pthread.h>
 
+    typedef enum
+    {
+        TOPIC_TYPE_NAME = 0,
+        TOPIC_TYPE_ID,
+    } TOPIC_TYPE_E;
+
     /* 订阅者节点 */
     typedef struct SubscriberNode
     {
-        void (*callback)(const char*, void*, uint32_t);
+        union
+        {
+            void (*cb_name)(const char*, void*, uint32_t);
+            void (*cb_id)(uint32_t, void*, uint32_t);
+        } callback;
+
         struct SubscriberNode* next;
     } SubscriberNode;
 
     /* 主题节点 */
     typedef struct TopicNode
     {
-        char* name;
+        union
+        {
+            uint64_t id;
+            char* name;
+        } topic;
+        TOPIC_TYPE_E type;
         SubscriberNode* subscribers;
         struct TopicNode* next;
     } TopicNode;
@@ -58,10 +74,15 @@ extern "C"
     PubSubManager* pubsub_create(void);
     void pubsub_destroy(PubSubManager* ps);
 
-    // 订阅
-    int pubsub_subscribe(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t));
     // 发布
-    void pubsub_publish(PubSubManager* ps, const char* topic, void* data, uint32_t size);
+    void pubsub_publish_name(PubSubManager* ps, const char* topic, void* data, uint32_t size);
+    // 订阅
+    int pubsub_subscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t));
+
+    // 发布
+    void pubsub_publish_id(PubSubManager* ps, uint32_t topic, void* data, uint32_t size);
+    // 订阅
+    int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t));
 
 #ifdef __cplusplus
 }
