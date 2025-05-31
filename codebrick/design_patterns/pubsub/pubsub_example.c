@@ -2,26 +2,34 @@
 #include "pubsub_platform.h"
 #include <stdio.h>
 
+#define PUB_SUB_PRINTF printf
+
 // 订阅者回调
 void log_callback(const char* topic, void* data, uint32_t size)
 {
     (void)size;
-    printf("[%s] Received: %s\n", topic, (char*)data);
+    PUB_SUB_PRINTF("[%s] Received: %s\n", topic, (char*)data);
 }
 
 void rcd_callback(const char* topic, void* data, uint32_t size)
 {
     (void)size;
-    printf("[%s] Received: %s\n", topic, (char*)data);
+    PUB_SUB_PRINTF("[%s]1 Received: %s\n", topic, (char*)data);
+}
+
+void rcd2_callback(const char* topic, void* data, uint32_t size)
+{
+    (void)size;
+    PUB_SUB_PRINTF("[%s]2 Received: %s\n", topic, (char*)data);
 }
 
 void evt_callback(uint32_t topic, void* data, uint32_t size)
 {
     (void)size;
-    printf("[%d] Received: %s\n", topic, (char*)data);
+    PUB_SUB_PRINTF("[%d] Received: %s\n", topic, (char*)data);
 }
 
-int main()
+int main(void)
 {
     TopicNode* curr;
 
@@ -33,12 +41,13 @@ int main()
     pubsub_subscribe_name(ps, "system/log", log_callback);
     pubsub_subscribe_id(ps, 66, evt_callback);
     pubsub_subscribe_name(ps, "system/rcd", rcd_callback);
+    pubsub_subscribe_name(ps, "system/rcd", rcd2_callback);
     pubsub_subscribe_id(ps, 88, evt_callback);
 
     curr = ps->topics;
     while (curr)
     {
-        printf("Topic type: %d\n", curr->type);
+        PUB_SUB_PRINTF("Topic type: %d\n", curr->type);
         curr = curr->next;
     }
 

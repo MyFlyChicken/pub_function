@@ -51,7 +51,7 @@ void pubsub_destroy(PubSubManager* ps)
     if (!ps)
         return;
 
-    pubsub_platform_mutex_unlock(ps->mutex);
+    pubsub_platform_mutex_lock(ps->mutex);
     TopicNode* curr_topic = ps->topics;
     while (curr_topic)
     {
@@ -62,12 +62,8 @@ void pubsub_destroy(PubSubManager* ps)
             pubsub_platform_free(curr_sub);
             curr_sub = next_sub;
         }
+				
         TopicNode* next_topic = curr_topic->next;
-        if (TOPIC_TYPE_NAME == curr_topic->type)
-        {
-            pubsub_platform_free(curr_topic->topic.name);
-        }
-
         pubsub_platform_free(curr_topic);
         curr_topic = next_topic;
     }
@@ -147,18 +143,18 @@ int pubsub_subscribe_name(PubSubManager* ps, const char* topic, void (*callback)
     TopicNode* target = find_topic_name(ps, topic);
     if (!target)
     {
-        target = malloc(sizeof(TopicNode));
-        target->topic.name = strdup(topic);
+        target              = pubsub_platform_malloc(sizeof(TopicNode));
+        target->topic.name  = topic;
         target->subscribers = NULL;
-        target->next = ps->topics; //旧主题往后移
-        target->type = TOPIC_TYPE_NAME;
-        ps->topics = target; //新添加的主题在最前边
+        target->next        = ps->topics; //旧主题往后移
+        target->type        = TOPIC_TYPE_NAME;
+        ps->topics          = target; //新添加的主题在最前边
     }
 
-    SubscriberNode* new_sub = malloc(sizeof(SubscriberNode));
+    SubscriberNode* new_sub   = pubsub_platform_malloc(sizeof(SubscriberNode));
     new_sub->callback.cb_name = callback;
-    new_sub->next = target->subscribers;
-    target->subscribers = new_sub;
+    new_sub->next             = target->subscribers;
+    target->subscribers       = new_sub;
 
     pubsub_platform_mutex_unlock(ps->mutex);
     return 0;
@@ -189,18 +185,18 @@ int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint
     TopicNode* target = find_topic_id(ps, topic);
     if (!target)
     {
-        target = malloc(sizeof(TopicNode));
-        target->topic.id = topic;
+        target              = pubsub_platform_malloc(sizeof(TopicNode));
+        target->topic.id    = topic;
         target->subscribers = NULL;
-        target->next = ps->topics; //旧主题往后移
-        target->type = TOPIC_TYPE_ID;
-        ps->topics = target; //新添加的主题在最前边
+        target->next        = ps->topics; //旧主题往后移
+        target->type        = TOPIC_TYPE_ID;
+        ps->topics          = target; //新添加的主题在最前边
     }
 
-    SubscriberNode* new_sub = malloc(sizeof(SubscriberNode));
+    SubscriberNode* new_sub = pubsub_platform_malloc(sizeof(SubscriberNode));
     new_sub->callback.cb_id = callback;
-    new_sub->next = target->subscribers;
-    target->subscribers = new_sub;
+    new_sub->next           = target->subscribers;
+    target->subscribers     = new_sub;
 
     pubsub_platform_mutex_unlock(ps->mutex);
     return 0;

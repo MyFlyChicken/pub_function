@@ -30,7 +30,6 @@ extern "C"
 #endif
 
 #include <stdint.h>
-#include <pthread.h>
 
     typedef enum
     {
@@ -55,11 +54,11 @@ extern "C"
     {
         union
         {
-            uint32_t id;
-            char* name;
+            uint32_t    id;
+            const char* name;
         } topic;
-        TOPIC_TYPE_E type; // 程序根据类型选择主题的内容（id or name）
-        SubscriberNode* subscribers;
+        TOPIC_TYPE_E      type; // 程序根据类型选择主题的内容（id or name）
+        SubscriberNode*   subscribers;
         struct TopicNode* next;
     } TopicNode;
 
@@ -67,12 +66,12 @@ extern "C"
     typedef struct
     {
         TopicNode* topics;
-        void* mutex;
+        void*      mutex;
     } PubSubManager;
 
     // 初始化/销毁接口
     PubSubManager* pubsub_create(void);
-    void pubsub_destroy(PubSubManager* ps);
+    void           pubsub_destroy(PubSubManager* ps);
 
     // 发布
     void pubsub_publish_name(PubSubManager* ps, const char* topic, void* data, uint32_t size);

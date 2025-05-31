@@ -24,6 +24,22 @@
 #include <stddef.h>
 #include <stdbool.h>
 
+#if defined(__linux__)
+#include <pthread.h>
+#include <stdlib.h>
+#elif defined(__FREERTOS__)
+#include "FreeRTOS.h"
+#include "semphr.h"
+#elif defined(__UCOS__)
+#include "os.h"
+#elif defined(__RTTHREAD__)
+#include <rtthread.h>
+#elif defined(__WINDOWS__)
+#include <windows.h>
+#else
+#include <stdlib.h>
+#endif
+
 #ifdef __cplusplus
 extern "C"
 {
