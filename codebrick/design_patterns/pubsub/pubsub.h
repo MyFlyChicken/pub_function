@@ -45,6 +45,7 @@ extern "C"
             void (*cb_name)(const char*, void*, uint32_t);
             void (*cb_id)(uint32_t, void*, uint32_t);
         } callback;
+        uint8_t priority; // 优先级，值越大优先级越高
 
         struct SubscriberNode* next;
     } SubscriberNode;
@@ -54,11 +55,11 @@ extern "C"
     {
         union
         {
-            uint32_t    id;
+            uint32_t id;
             const char* name;
         } topic;
-        TOPIC_TYPE_E      type; // 程序根据类型选择主题的内容（id or name）
-        SubscriberNode*   subscribers;
+        TOPIC_TYPE_E type; // 程序根据类型选择主题的内容（id or name）
+        SubscriberNode* subscribers;
         struct TopicNode* next;
     } TopicNode;
 
@@ -66,22 +67,22 @@ extern "C"
     typedef struct
     {
         TopicNode* topics;
-        void*      mutex;
+        void* mutex;
     } PubSubManager;
 
     // 初始化/销毁接口
     PubSubManager* pubsub_create(void);
-    void           pubsub_destroy(PubSubManager* ps);
+    void pubsub_destroy(PubSubManager* ps);
 
     // 发布
     void pubsub_publish_name(PubSubManager* ps, const char* topic, void* data, uint32_t size);
     // 订阅
-    int pubsub_subscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t));
+    int pubsub_subscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t), uint8_t priority);
 
     // 发布
     void pubsub_publish_id(PubSubManager* ps, uint32_t topic, void* data, uint32_t size);
     // 订阅
-    int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t));
+    int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t), uint8_t priority);
 
 #ifdef __cplusplus
 }

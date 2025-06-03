@@ -21,18 +21,16 @@
 #include <string.h>
 /* 默认平台配置 */
 static PubSubPlatformConfig_t _platform_config = {
-    .mutex         = NULL,
-    .malloc        = NULL,
-    .free          = NULL,
-    .mutex_create  = NULL,
-    .mutex_lock    = NULL,
-    .mutex_unlock  = NULL,
+    .mutex = NULL,
+    .malloc = NULL,
+    .free = NULL,
+    .mutex_create = NULL,
+    .mutex_lock = NULL,
+    .mutex_unlock = NULL,
     .mutex_destroy = NULL};
 
 /* Linux平台实现 */
 #ifdef __linux__
-#include <stdlib.h>
-#include <pthread.h>
 
 static void* linux_mutex_create(void)
 {
@@ -71,20 +69,18 @@ static void linux_mutex_destroy(void* mutex)
 
 static bool init_linux_platform(PubSubPlatformConfig_t* config)
 {
-    config->mutex_create  = linux_mutex_create;
-    config->mutex_lock    = linux_mutex_lock;
-    config->mutex_unlock  = linux_mutex_unlock;
+    config->mutex_create = linux_mutex_create;
+    config->mutex_lock = linux_mutex_lock;
+    config->mutex_unlock = linux_mutex_unlock;
     config->mutex_destroy = linux_mutex_destroy;
-    config->malloc        = malloc;
-    config->free          = free;
+    config->malloc = malloc;
+    config->free = free;
     return true;
 }
 #endif
 
 /* FreeRTOS平台实现 */
-#ifdef FREERTOS
-#include "FreeRTOS.h"
-#include "semphr.h"
+#ifdef __FREERTOS__
 
 static void* freertos_mutex_create(void)
 {
@@ -117,20 +113,18 @@ static void freertos_mutex_destroy(void* mutex)
 
 static bool init_freertos_platform(PubSubPlatformConfig_t* config)
 {
-    config->mutex_create  = freertos_mutex_create;
-    config->mutex_lock    = freertos_mutex_lock;
-    config->mutex_unlock  = freertos_mutex_unlock;
+    config->mutex_create = freertos_mutex_create;
+    config->mutex_lock = freertos_mutex_lock;
+    config->mutex_unlock = freertos_mutex_unlock;
     config->mutex_destroy = freertos_mutex_destroy;
-    config->malloc        = pvPortMalloc;
-    config->free          = pvPortFree;
+    config->malloc = pvPortMalloc;
+    config->free = pvPortFree;
     return true;
 }
 #endif
 
 /* RT-Thread平台实现 */
 #ifdef __RTTHREAD__
-#include <rtthread.h>
-#include <rtdevice.h>
 
 static void* rtthread_mutex_create(void)
 {
@@ -164,23 +158,22 @@ static void rtthread_mutex_destroy(void* mutex)
 
 static bool init_rtthread_platform(PubSubPlatformConfig_t* config)
 {
-    config->mutex_create  = rtthread_mutex_create;
-    config->mutex_lock    = rtthread_mutex_lock;
-    config->mutex_unlock  = rtthread_mutex_unlock;
+    config->mutex_create = rtthread_mutex_create;
+    config->mutex_lock = rtthread_mutex_lock;
+    config->mutex_unlock = rtthread_mutex_unlock;
     config->mutex_destroy = rtthread_mutex_destroy;
-    config->malloc        = rt_malloc;
-    config->free          = rt_free;
+    config->malloc = rt_malloc;
+    config->free = rt_free;
     return true;
 }
 #endif
 
 /* μC/OS平台实现 */
-#ifdef UCOS
-#include "os.h"
+#ifdef __UCOS__
 
 static void* ucos_mutex_create(void)
 {
-    OS_ERR    err;
+    OS_ERR err;
     OS_MUTEX* mutex = malloc(sizeof(OS_MUTEX));
     if (mutex)
     {
@@ -224,10 +217,10 @@ static void ucos_mutex_destroy(void* mutex)
 
 static bool init_ucos_platform(PlatformConfig* config)
 {
-    config->type          = PLATFORM_RTOS;
-    config->mutex_create  = ucos_mutex_create;
-    config->mutex_lock    = ucos_mutex_lock;
-    config->mutex_unlock  = ucos_mutex_unlock;
+    config->type = PLATFORM_RTOS;
+    config->mutex_create = ucos_mutex_create;
+    config->mutex_lock = ucos_mutex_lock;
+    config->mutex_unlock = ucos_mutex_unlock;
     config->mutex_destroy = ucos_mutex_destroy;
     return true;
 }
@@ -268,13 +261,13 @@ static void windows_mutex_destroy(void* mutex)
 
 static bool init_windows_platform(PlatformConfig* config)
 {
-    config->type          = PLATFORM_WINDOWS;
-    config->mutex_create  = windows_mutex_create;
-    config->mutex_lock    = windows_mutex_lock;
-    config->mutex_unlock  = windows_mutex_unlock;
+    config->type = PLATFORM_WINDOWS;
+    config->mutex_create = windows_mutex_create;
+    config->mutex_lock = windows_mutex_lock;
+    config->mutex_unlock = windows_mutex_unlock;
     config->mutex_destroy = windows_mutex_destroy;
-    config->malloc        = malloc;
-    config->free          = free;
+    config->malloc = malloc;
+    config->free = free;
     return true;
 }
 #endif
@@ -289,7 +282,7 @@ bool pubsub_platform_init(void)
     success = init_linux_platform(&config);
 #endif
 
-#ifdef FREERTOS
+#ifdef __FREERTOS__
     success = init_freertos_platform(&config);
 #endif
 
@@ -297,7 +290,7 @@ bool pubsub_platform_init(void)
     success = init_rtthread_platform(&config);
 #endif
 
-#ifdef UCOS
+#ifdef __UCOS__
     success = init_ucos_platform(&config);
 #endif
 

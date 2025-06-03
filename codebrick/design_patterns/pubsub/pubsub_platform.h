@@ -25,8 +25,8 @@
 #include <stdbool.h>
 
 #if defined(__linux__)
-#include <pthread.h>
 #include <stdlib.h>
+#include <pthread.h>
 #elif defined(__FREERTOS__)
 #include "FreeRTOS.h"
 #include "semphr.h"
@@ -34,10 +34,11 @@
 #include "os.h"
 #elif defined(__RTTHREAD__)
 #include <rtthread.h>
-#elif defined(__WINDOWS__)
+#include <rtdevice.h>
+#elif defined(_WIN32)
 #include <windows.h>
 #else
-#include <stdlib.h>
+#error "Unknown platform! Please define your platform."
 #endif
 
 #ifdef __cplusplus

@@ -38,11 +38,11 @@ int main(void)
     PubSubManager* ps = pubsub_create();
 
     // 订阅主题
-    pubsub_subscribe_name(ps, "system/log", log_callback);
-    pubsub_subscribe_id(ps, 66, evt_callback);
-    pubsub_subscribe_name(ps, "system/rcd", rcd_callback);
-    pubsub_subscribe_name(ps, "system/rcd", rcd2_callback);
-    pubsub_subscribe_id(ps, 88, evt_callback);
+    pubsub_subscribe_name(ps, "system/log", log_callback, 33);
+    pubsub_subscribe_id(ps, 66, evt_callback, 22);
+    pubsub_subscribe_name(ps, "system/rcd", rcd_callback, 99);
+    pubsub_subscribe_name(ps, "system/rcd", rcd2_callback, 101);
+    pubsub_subscribe_id(ps, 88, evt_callback, 0);
 
     curr = ps->topics;
     while (curr)

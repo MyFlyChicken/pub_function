@@ -18,8 +18,6 @@
  * @endcode
  */
 #include "pubsub.h"
-#include "pubsub_platform.h"
-#include "pubsub.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -62,7 +60,7 @@ void pubsub_destroy(PubSubManager* ps)
             pubsub_platform_free(curr_sub);
             curr_sub = next_sub;
         }
-				
+
         TopicNode* next_topic = curr_topic->next;
         pubsub_platform_free(curr_topic);
         curr_topic = next_topic;
@@ -136,25 +134,43 @@ void pubsub_publish_name(PubSubManager* ps, const char* topic, void* data, uint3
 }
 
 /* 订阅实现 */
-int pubsub_subscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t))
+int pubsub_subscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t), uint8_t priority)
 {
     pubsub_platform_mutex_lock(ps->mutex);
 
     TopicNode* target = find_topic_name(ps, topic);
     if (!target)
     {
-        target              = pubsub_platform_malloc(sizeof(TopicNode));
-        target->topic.name  = topic;
+        target = pubsub_platform_malloc(sizeof(TopicNode));
+        target->topic.name = topic;
         target->subscribers = NULL;
-        target->next        = ps->topics; //旧主题往后移
-        target->type        = TOPIC_TYPE_NAME;
-        ps->topics          = target; //新添加的主题在最前边
+        target->next = ps->topics; //旧主题往后移
+        target->type = TOPIC_TYPE_NAME;
+        ps->topics = target; //新添加的主题在最前边
     }
 
-    SubscriberNode* new_sub   = pubsub_platform_malloc(sizeof(SubscriberNode));
+    SubscriberNode* new_sub = pubsub_platform_malloc(sizeof(SubscriberNode));
     new_sub->callback.cb_name = callback;
-    new_sub->next             = target->subscribers;
-    target->subscribers       = new_sub;
+    new_sub->priority = priority;
+
+    // 按优先级插入订阅者，优先级高的在前面
+    if (!target->subscribers || priority > target->subscribers->priority)
+    {
+        // 如果链表为空或者新订阅者优先级比头节点高
+        new_sub->next = target->subscribers;
+        target->subscribers = new_sub;
+    }
+    else
+    {
+        // 查找合适的插入位置
+        SubscriberNode* curr = target->subscribers;
+        while (curr->next && curr->next->priority >= priority)
+        {
+            curr = curr->next;
+        }
+        new_sub->next = curr->next;
+        curr->next = new_sub;
+    }
 
     pubsub_platform_mutex_unlock(ps->mutex);
     return 0;
@@ -178,25 +194,43 @@ void pubsub_publish_id(PubSubManager* ps, uint32_t topic, void* data, uint32_t s
     pubsub_platform_mutex_unlock(ps->mutex);
 }
 
-int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t))
+int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t), uint8_t priority)
 {
     pubsub_platform_mutex_lock(ps->mutex);
 
     TopicNode* target = find_topic_id(ps, topic);
     if (!target)
     {
-        target              = pubsub_platform_malloc(sizeof(TopicNode));
-        target->topic.id    = topic;
+        target = pubsub_platform_malloc(sizeof(TopicNode));
+        target->topic.id = topic;
         target->subscribers = NULL;
-        target->next        = ps->topics; //旧主题往后移
-        target->type        = TOPIC_TYPE_ID;
-        ps->topics          = target; //新添加的主题在最前边
+        target->next = ps->topics; //旧主题往后移
+        target->type = TOPIC_TYPE_ID;
+        ps->topics = target; //新添加的主题在最前边
     }
 
     SubscriberNode* new_sub = pubsub_platform_malloc(sizeof(SubscriberNode));
     new_sub->callback.cb_id = callback;
-    new_sub->next           = target->subscribers;
-    target->subscribers     = new_sub;
+    new_sub->priority = priority;
+
+    // 按优先级插入订阅者，优先级高的在前面
+    if (!target->subscribers || priority > target->subscribers->priority)
+    {
+        // 如果链表为空或者新订阅者优先级比头节点高
+        new_sub->next = target->subscribers;
+        target->subscribers = new_sub;
+    }
+    else
+    {
+        // 查找合适的插入位置
+        SubscriberNode* curr = target->subscribers;
+        while (curr->next && curr->next->priority >= priority)
+        {
+            curr = curr->next;
+        }
+        new_sub->next = curr->next;
+        curr->next = new_sub;
+    }
 
     pubsub_platform_mutex_unlock(ps->mutex);
     return 0;
