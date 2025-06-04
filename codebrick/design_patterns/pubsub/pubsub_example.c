@@ -63,7 +63,9 @@ int main(void)
     pubsub_publish_name(ps, "system/log", "Application started333", 0);
     pubsub_publish_name(ps, "system/rcd", "hello tr1", 0);
 
+    pubsub_unsubscribe_name(ps, "system/rcd", rcd2_callback);
     pubsub_publish_id(ps, 55, "hello 55", 0);
+    pubsub_publish_name(ps, "system/rcd", "hello tr1", 0);
 
     // 清理资源
     pubsub_destroy(ps);

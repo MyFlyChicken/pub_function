@@ -84,6 +84,10 @@ extern "C"
     // 订阅
     int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t), uint8_t priority);
 
+    // 取消订阅
+    int pubsub_unsubscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t));
+    int pubsub_unsubscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t));
+
 #ifdef __cplusplus
 }
 #endif

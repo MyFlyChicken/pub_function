@@ -235,3 +235,147 @@ int pubsub_subscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint
     pubsub_platform_mutex_unlock(ps->mutex);
     return 0;
 }
+
+/* 取消订阅实现-名称方式 */
+int pubsub_unsubscribe_name(PubSubManager* ps, const char* topic, void (*callback)(const char*, void*, uint32_t))
+{
+    if (!ps || !topic || !callback)
+    {
+        return -1; // 参数无效
+    }
+
+    int result = -1; // 默认未找到订阅
+    pubsub_platform_mutex_lock(ps->mutex);
+
+    TopicNode* target = find_topic_name(ps, topic);
+    if (target)
+    {
+        SubscriberNode* curr = target->subscribers;
+        SubscriberNode* prev = NULL;
+
+        // 查找匹配的订阅者
+        while (curr)
+        {
+            if (curr->callback.cb_name == callback)
+            {
+                // 找到匹配的订阅者，将其从链表中移除
+                if (prev)
+                {
+                    prev->next = curr->next;
+                }
+                else
+                {
+                    // 移除的是第一个节点
+                    target->subscribers = curr->next;
+                }
+                pubsub_platform_free(curr);
+                result = 0; // 成功取消订阅
+                break;
+            }
+            prev = curr;
+            curr = curr->next;
+        }
+
+        // 如果主题下没有订阅者了，可以选择移除主题节点
+        if (target->subscribers == NULL)
+        {
+            // 从主题链表中移除主题节点
+            TopicNode* curr_topic = ps->topics;
+            TopicNode* prev_topic = NULL;
+
+            while (curr_topic)
+            {
+                if (curr_topic == target)
+                {
+                    if (prev_topic)
+                    {
+                        prev_topic->next = curr_topic->next;
+                    }
+                    else
+                    {
+                        ps->topics = curr_topic->next;
+                    }
+                    pubsub_platform_free(curr_topic);
+                    break;
+                }
+                prev_topic = curr_topic;
+                curr_topic = curr_topic->next;
+            }
+        }
+    }
+
+    pubsub_platform_mutex_unlock(ps->mutex);
+    return result;
+}
+
+/* 取消订阅实现-ID方式 */
+int pubsub_unsubscribe_id(PubSubManager* ps, uint32_t topic, void (*callback)(uint32_t, void*, uint32_t))
+{
+    if (!ps || !callback)
+    {
+        return -1; // 参数无效
+    }
+
+    int result = -1; // 默认未找到订阅
+    pubsub_platform_mutex_lock(ps->mutex);
+
+    TopicNode* target = find_topic_id(ps, topic);
+    if (target)
+    {
+        SubscriberNode* curr = target->subscribers;
+        SubscriberNode* prev = NULL;
+
+        // 查找匹配的订阅者
+        while (curr)
+        {
+            if (curr->callback.cb_id == callback)
+            {
+                // 找到匹配的订阅者，将其从链表中移除
+                if (prev)
+                {
+                    prev->next = curr->next;
+                }
+                else
+                {
+                    // 移除的是第一个节点
+                    target->subscribers = curr->next;
+                }
+                pubsub_platform_free(curr);
+                result = 0; // 成功取消订阅
+                break;
+            }
+            prev = curr;
+            curr = curr->next;
+        }
+
+        // 如果主题下没有订阅者了，可以选择移除主题节点
+        if (target->subscribers == NULL)
+        {
+            // 从主题链表中移除主题节点
+            TopicNode* curr_topic = ps->topics;
+            TopicNode* prev_topic = NULL;
+
+            while (curr_topic)
+            {
+                if (curr_topic == target)
+                {
+                    if (prev_topic)
+                    {
+                        prev_topic->next = curr_topic->next;
+                    }
+                    else
+                    {
+                        ps->topics = curr_topic->next;
+                    }
+                    pubsub_platform_free(curr_topic);
+                    break;
+                }
+                prev_topic = curr_topic;
+                curr_topic = curr_topic->next;
+            }
+        }
+    }
+
+    pubsub_platform_mutex_unlock(ps->mutex);
+    return result;
+}
