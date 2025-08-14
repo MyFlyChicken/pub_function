@@ -48,6 +48,11 @@ PP_WEAK uint32_t pp_get_time_tick(void)
     return 0;
 }
 
+static inline uint16_t read_u16_be(const uint8_t* buf)
+{
+    return ((uint16_t)buf[1] << 8) | (uint16_t)buf[0];
+}
+
 static inline void package_append_byte(uint8_t** frame, uint8_t data)
 {
     *(*frame)++ = data;
@@ -92,13 +97,15 @@ static inline void package_subtract_u32(const uint8_t** frame, uint32_t* u32_dat
     *u32_data = (uint32_t)buf[0] << 24 | (uint32_t)buf[1] << 16 | (uint32_t)buf[2] << 8 | (uint32_t)buf[3];
 }
 
-pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify)
+pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stashed_cb data_stashed, data_parse_cb data_parse)
 {
     PP_ASSERT(h);
 
     h->func_and_cb_list = list;
     h->send_cb = send;
     h->notify_cb = notify;
+    h->data_stashed_cb = data_stashed;
+    h->data_parse_cb = data_parse;
 
     h->rx_poll_step = RX_POLL_WAIT_HEAD1;
     h->fb_save_index = 0;
@@ -204,6 +211,102 @@ uint16_t pp_save_hw_recv_data(struct pp_handle* h, const uint8_t* data, uint16_t
     return (len - rel);
 }
 
+// void pp_poll(struct pp_handle* h)
+// {
+//     PP_ASSERT(h);
+
+// #if PP_TIMEOUT_DET_EN
+//     /* check is timeout occur */
+//     check_is_timeout_occur(h);
+// #endif
+
+//     for (;;)
+//     {
+//         uint32_t tick = pp_get_time_tick();
+
+//         uint8_t ch;
+//         if (ringbuffer_getchar(&h->rb, &ch) != 1)
+//         {
+//             /* check is no data long time */
+//             if (IS_TIMEOUT(h->frame_timeout, tick, FRAME_TIMEOUT))
+//             {
+//                 // PP_LOG_D("long time no data, end frame.");
+//                 h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+//                 h->fb_save_index = 0;
+//                 h->frame_timeout = tick;
+//             }
+
+//             POLL_DELAY;
+
+//             break;
+//         }
+//         else
+//         {
+//             h->fb_pool[h->fb_save_index++] = ch;
+//             h->frame_timeout = tick;
+//         }
+
+//         /* state-machine */
+//         switch (h->rx_poll_step)
+//         {
+//             case RX_POLL_WAIT_HEAD1:
+//                 if (ch == FRAME_HEAD1)
+//                 {
+//                     h->rx_poll_step = RX_POLL_WAIT_HEAD2;
+//                 }
+//                 break;
+//             case RX_POLL_WAIT_HEAD2:
+//                 if (ch == FRAME_HEAD2)
+//                 {
+//                     h->rx_poll_step = RX_POLL_WAIT_LEN;
+//                 }
+//                 else
+//                 {
+//                     h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+//                     h->fb_save_index = 0;
+//                 }
+//                 break;
+//             case RX_POLL_WAIT_LEN:
+//                 if (h->fb_save_index >= (FRAME_LEN_POS + 2))
+//                 {
+//                     h->frame_len = (uint16_t)h->fb_pool[FRAME_LEN_POS] << 8 | (uint16_t)h->fb_pool[FRAME_LEN_POS + 1];
+
+//                     if (h->frame_len > PP_FRAMEBUFFER_LEN)
+//                     {
+//                         /* len is too long */
+//                         h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+//                         h->fb_save_index = 0;
+//                         break;
+//                     }
+
+//                     /* prepare to get all frame */
+//                     h->rx_poll_step = RX_POLL_WAIT_ALL;
+//                 }
+//                 break;
+//             case RX_POLL_WAIT_ALL:
+//                 if (h->fb_save_index >= h->frame_len)
+//                 {
+//                     parse_frame(h);
+
+//                     h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+//                     h->fb_save_index = 0;
+//                 }
+//                 break;
+//             default:
+//                 PP_LOG_E("handle step may not be init.");
+//                 h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+//                 h->fb_save_index = 0;
+//                 break;
+//         }
+//     }
+// }
+/* Helper function to reset frame state */
+static inline void reset_frame_state(struct pp_handle* h)
+{
+    h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+    h->fb_save_index = 0;
+}
+
 void pp_poll(struct pp_handle* h)
 {
     PP_ASSERT(h);
@@ -213,83 +316,121 @@ void pp_poll(struct pp_handle* h)
     check_is_timeout_occur(h);
 #endif
 
-    for (;;)
+    if (h->data_parse_cb)
     {
-        uint32_t tick = pp_get_time_tick();
+        h->data_parse_cb(); /* Notify that data can be parsed */
+    }
+    else
+    {
+        POLL_DELAY;
+    }
 
+    /* Process data using state machine until we have a complete frame */
+    while (ringbuffer_data_len(&h->rb) > 0)
+    {
         uint8_t ch;
+
+        /* If we're waiting for a complete frame, check if we have enough data */
+        if (h->rx_poll_step == RX_POLL_WAIT_ALL)
+        {
+            if (ringbuffer_data_len(&h->rb) >= (h->frame_len - h->fb_save_index))
+            {
+                /* Read the remaining frame data */
+                uint32_t remaining_len = h->frame_len - h->fb_save_index;
+                uint32_t actual_len = ringbuffer_get(&h->rb, &h->fb_pool[h->fb_save_index], remaining_len);
+                if (actual_len == remaining_len)
+                {
+                    h->fb_save_index = h->frame_len;
+                    parse_frame(h);
+                    reset_frame_state(h);
+                    continue; /* Process next frame if available */
+                }
+                else
+                {
+                    PP_LOG_E("Failed to read complete frame data");
+                    reset_frame_state(h);
+                    continue;
+                }
+            }
+            else
+            {
+                break; /* Not enough data for complete frame, wait for more */
+            }
+        }
+
+        /* Read one byte for state machine processing */
         if (ringbuffer_getchar(&h->rb, &ch) != 1)
         {
-            /* check is no data long time */
-            if (IS_TIMEOUT(h->frame_timeout, tick, FRAME_TIMEOUT))
-            {
-                // PP_LOG_D("long time no data, end frame.");
-                h->rx_poll_step = RX_POLL_WAIT_HEAD1;
-                h->fb_save_index = 0;
-                h->frame_timeout = tick;
-            }
-
-            POLL_DELAY;
-
-            break;
+            break; /* No more data available */
         }
-        else
+
+        /* Check buffer overflow before writing */
+        if (h->fb_save_index >= PP_FRAMEBUFFER_LEN)
         {
-            h->fb_pool[h->fb_save_index++] = ch;
-            h->frame_timeout = tick;
+            PP_LOG_E("Frame buffer overflow, reset state.");
+            reset_frame_state(h);
+            continue;
         }
 
-        /* state-machine */
+        h->fb_pool[h->fb_save_index++] = ch;
+
+        /* State machine processing */
         switch (h->rx_poll_step)
         {
             case RX_POLL_WAIT_HEAD1:
+            {
                 if (ch == FRAME_HEAD1)
                 {
                     h->rx_poll_step = RX_POLL_WAIT_HEAD2;
                 }
+                else
+                {
+                    reset_frame_state(h);
+                }
                 break;
+            }
             case RX_POLL_WAIT_HEAD2:
+            {
                 if (ch == FRAME_HEAD2)
                 {
                     h->rx_poll_step = RX_POLL_WAIT_LEN;
                 }
                 else
                 {
-                    h->rx_poll_step = RX_POLL_WAIT_HEAD1;
-                    h->fb_save_index = 0;
+                    reset_frame_state(h);
+                    /* Check if current byte could be new frame start */
+                    if (ch == FRAME_HEAD1)
+                    {
+                        h->fb_pool[h->fb_save_index++] = ch;
+                        h->rx_poll_step = RX_POLL_WAIT_HEAD2;
+                    }
                 }
                 break;
+            }
             case RX_POLL_WAIT_LEN:
+            {
                 if (h->fb_save_index >= (FRAME_LEN_POS + 2))
                 {
-                    h->frame_len = (uint16_t)h->fb_pool[FRAME_LEN_POS] << 8 | (uint16_t)h->fb_pool[FRAME_LEN_POS + 1];
+                    h->frame_len = read_u16_be(&h->fb_pool[FRAME_LEN_POS]);
 
+                    /* Validate frame length */
                     if (h->frame_len > PP_FRAMEBUFFER_LEN)
                     {
-                        /* len is too long */
-                        h->rx_poll_step = RX_POLL_WAIT_HEAD1;
-                        h->fb_save_index = 0;
+                        PP_LOG_E("Frame length too long: %d", h->frame_len);
+                        reset_frame_state(h);
                         break;
                     }
-
-                    /* prepare to get all frame */
+                    /* prepare to get remaining all frame */
                     h->rx_poll_step = RX_POLL_WAIT_ALL;
                 }
                 break;
-            case RX_POLL_WAIT_ALL:
-                if (h->fb_save_index >= h->frame_len)
-                {
-                    parse_frame(h);
-
-                    h->rx_poll_step = RX_POLL_WAIT_HEAD1;
-                    h->fb_save_index = 0;
-                }
-                break;
+            }
             default:
-                PP_LOG_E("handle step may not be init.");
-                h->rx_poll_step = RX_POLL_WAIT_HEAD1;
-                h->fb_save_index = 0;
+            {
+                PP_LOG_E("Invalid rx_poll_step: %d", h->rx_poll_step);
+                reset_frame_state(h);
                 break;
+            }
         }
     }
 }

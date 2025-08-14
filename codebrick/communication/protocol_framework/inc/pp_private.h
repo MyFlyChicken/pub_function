@@ -60,6 +60,8 @@ extern "C"
 
     /* payload parse callback function */
     typedef void (*parse_cb)(struct pp_handle* h, frame_t* f);
+    typedef void (*data_stashed_cb)(void);
+    typedef void (*data_parse_cb)(void);
 
     /* function code and it's parse fucntion */
     typedef struct
@@ -120,14 +122,16 @@ extern "C"
 
         rx_poll_step_e rx_poll_step; /* the step of analyze rx datas, like state-machine */
 
-        hw_send_cb send_cb;  /* Stcak will call this cb to send data in hardware */
-        notify_cb notify_cb; /* notify upper level some thing */
+        hw_send_cb send_cb;              /* Stcak will call this cb to send data in hardware */
+        notify_cb notify_cb;             /* notify upper level some thing */
+        data_stashed_cb data_stashed_cb; /* notify receive data is stashed */
+        data_parse_cb data_parse_cb;     /* notify upper data can parse */
     };
 
     void pp_log_hex(const uint8_t* data, uint16_t len);
     ret_t pp_trans_err_to_ret(pp_err_t err);
     pp_err_t pp_trans_ret_to_err(ret_t ret);
-    pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify);
+    pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stashed_cb data_stashed, data_parse_cb data_parse);
     pp_err_t pp_send(struct pp_handle* h, const frame_t* f, uint16_t timeout);
 
     void package_append_str(uint8_t** frame, const uint8_t* pdata, uint16_t len);
