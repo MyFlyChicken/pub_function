@@ -25,12 +25,12 @@
 #include "../inc/pp_private.h"
 
 /* The format definition of frame */
-#define FRAME_HEAD1             (0x5A)
-#define FRAME_HEAD2             (0xA5)
-#define FRAME_LEN_POS           (2)
-#define FRAME_INDEX_POS         (4)
-#define FRAME_FUNC_POS          (6)
-#define FRAME_RET_POS           (7)
+#define FRAME_HEAD1 (0x5A)
+#define FRAME_HEAD2 (0xA5)
+#define FRAME_LEN_POS (2)
+#define FRAME_INDEX_POS (4)
+#define FRAME_FUNC_POS (6)
+#define FRAME_RET_POS (7)
 #define FRAME_PAYLOAD_POS(FUNC) (IS_RESP_FUNC(FUNC) ? (8) : (7))
 
 /* Check is timeout */
@@ -48,15 +48,59 @@ PP_WEAK uint32_t pp_get_time_tick(void)
     return 0;
 }
 
+static inline void package_append_byte(uint8_t** frame, uint8_t data)
+{
+    *(*frame)++ = data;
+}
+
+static inline void package_append_u16(uint8_t** frame, uint16_t data)
+{
+    *(*frame)++ = data >> 8;
+    *(*frame)++ = data;
+}
+
+static inline void package_append_u32(uint8_t** frame, uint32_t data)
+{
+    *(*frame)++ = data >> 24;
+    *(*frame)++ = data >> 16;
+    *(*frame)++ = data >> 8;
+    *(*frame)++ = data;
+}
+
+static inline void package_subtract_byte(const uint8_t** frame, uint8_t* u8_data)
+{
+    *u8_data = *(*frame)++;
+}
+
+static inline void package_subtract_u16(const uint8_t** frame, uint16_t* u16_data)
+{
+    uint8_t buf[2];
+
+    memcpy(buf, *frame, 2);
+    *frame += 2;
+
+    *u16_data = (uint16_t)buf[0] << 8 | (uint16_t)buf[1];
+}
+
+static inline void package_subtract_u32(const uint8_t** frame, uint32_t* u32_data)
+{
+    uint8_t buf[4];
+
+    memcpy(buf, *frame, 4);
+    *frame += 4;
+
+    *u32_data = (uint32_t)buf[0] << 24 | (uint32_t)buf[1] << 16 | (uint32_t)buf[2] << 8 | (uint32_t)buf[3];
+}
+
 pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify)
 {
     PP_ASSERT(h);
 
     h->func_and_cb_list = list;
-    h->send_cb          = send;
-    h->notify_cb        = notify;
+    h->send_cb = send;
+    h->notify_cb = notify;
 
-    h->rx_poll_step  = RX_POLL_WAIT_HEAD1;
+    h->rx_poll_step = RX_POLL_WAIT_HEAD1;
     h->fb_save_index = 0;
 
     ringbuffer_init(&h->rb, h->rb_pool, PP_RINGBUFFER_LEN);
@@ -72,22 +116,26 @@ pp_err_t pp_send(struct pp_handle* h, const frame_t* f, uint16_t timeout)
 {
     PP_ASSERT(h && f);
 
-    if (f->payload_len > PP_PAYLOAD_MAX_LEN) {
+    if (f->payload_len > PP_PAYLOAD_MAX_LEN)
+    {
         PP_LOG_D("payload is too long.");
         return PP_EPARAM;
     }
 
     uint8_t* buf = PP_MALLOC(f->payload_len + 10);
-    if (!buf) {
+    if (!buf)
+    {
         PP_LOG_E("malloc fail.");
         return PP_ENOMEM;
     }
 
     uint16_t len;
-    if (IS_REQ_FUNC(f->func)) {
+    if (IS_REQ_FUNC(f->func))
+    {
         len = f->payload_len + 9;
     }
-    else {
+    else
+    {
         len = f->payload_len + 10;
     }
 
@@ -98,22 +146,26 @@ pp_err_t pp_send(struct pp_handle* h, const frame_t* f, uint16_t timeout)
     package_append_u16(&scan, f->index);
     package_append_byte(&scan, f->func);
 
-    if (IS_RESP_FUNC(f->func)) {
+    if (IS_RESP_FUNC(f->func))
+    {
         package_append_byte(&scan, f->ret);
     }
-    else {
+    else
+    {
 #if PP_TIMEOUT_DET_EN
         timeout_pkg_t* pkg = PP_MALLOC(sizeof(timeout_pkg_t));
-        if (!pkg) {
+        if (!pkg)
+        {
             PP_LOG_E("timeout malloc fail.");
             PP_FREE(buf);
             return PP_ENOMEM;
         }
-        else {
-            pkg->start_tick  = pp_get_time_tick();
-            pkg->time        = timeout;
+        else
+        {
+            pkg->start_tick = pp_get_time_tick();
+            pkg->time = timeout;
             pkg->frame_index = f->index;
-            pkg->frame_func  = RESP_FUNC(f->func);
+            pkg->frame_func = RESP_FUNC(f->func);
 
             list_add(&pkg->list, &h->timeout_pkg_list.list);
         }
@@ -126,16 +178,19 @@ pp_err_t pp_send(struct pp_handle* h, const frame_t* f, uint16_t timeout)
     package_append_u16(&scan, crc);
 
     int ret = 0;
-    if (h->send_cb) {
+    if (h->send_cb)
+    {
         ret = h->send_cb(buf, len);
     }
 
     PP_FREE(buf);
 
-    if (ret != 0) {
+    if (ret != 0)
+    {
         return PP_EIO;
     }
-    else {
+    else
+    {
         return PP_EOK;
     }
 }
@@ -158,15 +213,18 @@ void pp_poll(struct pp_handle* h)
     check_is_timeout_occur(h);
 #endif
 
-    for (;;) {
+    for (;;)
+    {
         uint32_t tick = pp_get_time_tick();
 
         uint8_t ch;
-        if (ringbuffer_getchar(&h->rb, &ch) != 1) {
+        if (ringbuffer_getchar(&h->rb, &ch) != 1)
+        {
             /* check is no data long time */
-            if (IS_TIMEOUT(h->frame_timeout, tick, FRAME_TIMEOUT)) {
+            if (IS_TIMEOUT(h->frame_timeout, tick, FRAME_TIMEOUT))
+            {
                 // PP_LOG_D("long time no data, end frame.");
-                h->rx_poll_step  = RX_POLL_WAIT_HEAD1;
+                h->rx_poll_step = RX_POLL_WAIT_HEAD1;
                 h->fb_save_index = 0;
                 h->frame_timeout = tick;
             }
@@ -175,55 +233,63 @@ void pp_poll(struct pp_handle* h)
 
             break;
         }
-        else {
+        else
+        {
             h->fb_pool[h->fb_save_index++] = ch;
-            h->frame_timeout               = tick;
+            h->frame_timeout = tick;
         }
 
         /* state-machine */
-        switch (h->rx_poll_step) {
-        case RX_POLL_WAIT_HEAD1:
-            if (ch == FRAME_HEAD1) {
-                h->rx_poll_step = RX_POLL_WAIT_HEAD2;
-            }
-            break;
-        case RX_POLL_WAIT_HEAD2:
-            if (ch == FRAME_HEAD2) {
-                h->rx_poll_step = RX_POLL_WAIT_LEN;
-            }
-            else {
-                h->rx_poll_step  = RX_POLL_WAIT_HEAD1;
-                h->fb_save_index = 0;
-            }
-            break;
-        case RX_POLL_WAIT_LEN:
-            if (h->fb_save_index >= (FRAME_LEN_POS + 2)) {
-                h->frame_len = (uint16_t)h->fb_pool[FRAME_LEN_POS] << 8 | (uint16_t)h->fb_pool[FRAME_LEN_POS + 1];
-
-                if (h->frame_len > PP_FRAMEBUFFER_LEN) {
-                    /* len is too long */
-                    h->rx_poll_step  = RX_POLL_WAIT_HEAD1;
-                    h->fb_save_index = 0;
-                    break;
+        switch (h->rx_poll_step)
+        {
+            case RX_POLL_WAIT_HEAD1:
+                if (ch == FRAME_HEAD1)
+                {
+                    h->rx_poll_step = RX_POLL_WAIT_HEAD2;
                 }
+                break;
+            case RX_POLL_WAIT_HEAD2:
+                if (ch == FRAME_HEAD2)
+                {
+                    h->rx_poll_step = RX_POLL_WAIT_LEN;
+                }
+                else
+                {
+                    h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+                    h->fb_save_index = 0;
+                }
+                break;
+            case RX_POLL_WAIT_LEN:
+                if (h->fb_save_index >= (FRAME_LEN_POS + 2))
+                {
+                    h->frame_len = (uint16_t)h->fb_pool[FRAME_LEN_POS] << 8 | (uint16_t)h->fb_pool[FRAME_LEN_POS + 1];
 
-                /* prepare to get all frame */
-                h->rx_poll_step = RX_POLL_WAIT_ALL;
-            }
-            break;
-        case RX_POLL_WAIT_ALL:
-            if (h->fb_save_index >= h->frame_len) {
-                parse_frame(h);
+                    if (h->frame_len > PP_FRAMEBUFFER_LEN)
+                    {
+                        /* len is too long */
+                        h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+                        h->fb_save_index = 0;
+                        break;
+                    }
 
-                h->rx_poll_step  = RX_POLL_WAIT_HEAD1;
+                    /* prepare to get all frame */
+                    h->rx_poll_step = RX_POLL_WAIT_ALL;
+                }
+                break;
+            case RX_POLL_WAIT_ALL:
+                if (h->fb_save_index >= h->frame_len)
+                {
+                    parse_frame(h);
+
+                    h->rx_poll_step = RX_POLL_WAIT_HEAD1;
+                    h->fb_save_index = 0;
+                }
+                break;
+            default:
+                PP_LOG_E("handle step may not be init.");
+                h->rx_poll_step = RX_POLL_WAIT_HEAD1;
                 h->fb_save_index = 0;
-            }
-            break;
-        default:
-            PP_LOG_E("handle step may not be init.");
-            h->rx_poll_step  = RX_POLL_WAIT_HEAD1;
-            h->fb_save_index = 0;
-            break;
+                break;
         }
     }
 }
@@ -236,18 +302,19 @@ void pp_poll(struct pp_handle* h)
  */
 ret_t pp_trans_err_to_ret(pp_err_t err)
 {
-    switch (err) {
-    case PP_EOK:
-        return RET_OK;
-    case PP_EPARAM:
-        return RET_INVAL;
-    case PP_EBUSY:
-    case PP_EENV:
-        return RET_REJECT;
-    case PP_EUNKNOWN:
-        return RET_NOT_SUPPORT;
-    default:
-        return RET_HW_ERR;
+    switch (err)
+    {
+        case PP_EOK:
+            return RET_OK;
+        case PP_EPARAM:
+            return RET_INVAL;
+        case PP_EBUSY:
+        case PP_EENV:
+            return RET_REJECT;
+        case PP_EUNKNOWN:
+            return RET_NOT_SUPPORT;
+        default:
+            return RET_HW_ERR;
     }
 }
 
@@ -259,37 +326,19 @@ ret_t pp_trans_err_to_ret(pp_err_t err)
  */
 pp_err_t pp_trans_ret_to_err(ret_t ret)
 {
-    switch (ret) {
-    case RET_OK:
-        return PP_EOK;
-    case RET_NOT_SUPPORT:
-        return PP_EUNKNOWN;
-    case RET_HW_ERR:
-        return PP_ERROR;
-    case RET_REJECT:
-        return PP_EENV;
-    default:
-        return PP_ERROR;
+    switch (ret)
+    {
+        case RET_OK:
+            return PP_EOK;
+        case RET_NOT_SUPPORT:
+            return PP_EUNKNOWN;
+        case RET_HW_ERR:
+            return PP_ERROR;
+        case RET_REJECT:
+            return PP_EENV;
+        default:
+            return PP_ERROR;
     }
-}
-
-void package_append_byte(uint8_t** frame, uint8_t data)
-{
-    *(*frame)++ = data;
-}
-
-void package_append_u16(uint8_t** frame, uint16_t data)
-{
-    *(*frame)++ = data >> 8;
-    *(*frame)++ = data;
-}
-
-void package_append_u32(uint8_t** frame, uint32_t data)
-{
-    *(*frame)++ = data >> 24;
-    *(*frame)++ = data >> 16;
-    *(*frame)++ = data >> 8;
-    *(*frame)++ = data;
 }
 
 void package_append_str(uint8_t** frame, const uint8_t* pdata, uint16_t len)
@@ -298,40 +347,18 @@ void package_append_str(uint8_t** frame, const uint8_t* pdata, uint16_t len)
     *frame += len;
 }
 
-void package_subtract_byte(const uint8_t** frame, uint8_t* u8_data)
-{
-    *u8_data = *(*frame)++;
-}
-
-void package_subtract_u16(const uint8_t** frame, uint16_t* u16_data)
-{
-    uint8_t buf[2];
-
-    memcpy(buf, *frame, 2);
-    *frame += 2;
-
-    *u16_data = (uint16_t)buf[0] << 8 | (uint16_t)buf[1];
-}
-
-void package_subtract_u32(const uint8_t** frame, uint32_t* u32_data)
-{
-    uint8_t buf[4];
-
-    memcpy(buf, *frame, 4);
-    *frame += 4;
-
-    *u32_data = (uint32_t)buf[0] << 24 | (uint32_t)buf[1] << 16 | (uint32_t)buf[2] << 8 | (uint32_t)buf[3];
-}
-
 void pp_log_hex(const uint8_t* data, uint16_t len)
 {
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < len; i++)
+    {
         PP_PRINTF("%02x ", data[i]);
 
-        if ((i + 1) % 16 == 0) {
+        if ((i + 1) % 16 == 0)
+        {
             PP_PRINTF("\n");
         }
-        else if ((i + 1) % 8 == 0) {
+        else if ((i + 1) % 8 == 0)
+        {
             PP_PRINTF("\t");
         }
     }
@@ -345,12 +372,14 @@ static void check_is_timeout_occur(struct pp_handle* h)
 
     list_for_each(pos, &h->timeout_pkg_list.list)
     {
-        if (IS_TIMEOUT(((timeout_pkg_t*)pos)->start_tick, tick, ((timeout_pkg_t*)pos)->time)) {
+        if (IS_TIMEOUT(((timeout_pkg_t*)pos)->start_tick, tick, ((timeout_pkg_t*)pos)->time))
+        {
             list_del(pos);
 
-            if (h->notify_cb) {
+            if (h->notify_cb)
+            {
                 param_of_notify_timeout_t param;
-                param.frame_func  = ((timeout_pkg_t*)pos)->frame_func;
+                param.frame_func = ((timeout_pkg_t*)pos)->frame_func;
                 param.frame_index = ((timeout_pkg_t*)pos)->frame_index;
                 h->notify_cb(h, EVT_ACK_TIMEOUT, &param);
             }
@@ -369,29 +398,34 @@ static void parse_frame(struct pp_handle* h)
     uint16_t crc_get = (uint16_t)h->fb_pool[h->frame_len - 2] << 8 | (uint16_t)h->fb_pool[h->frame_len - 1];
     uint16_t crc_cal = pp_crc_calculate(h->fb_pool, h->frame_len - 2);
 
-    if (crc_get != crc_cal) {
+    if (crc_get != crc_cal)
+    {
         PP_LOG_E("crc-get(0x%04x) is not equal to crc-cal(0x%04x).", crc_get, crc_cal);
         return;
     }
 
     /* trans stream to frame var */
     frame_t frame;
-    frame.func        = h->fb_pool[FRAME_FUNC_POS];
-    frame.index       = (uint16_t)h->fb_pool[FRAME_INDEX_POS] << 8 | (uint16_t)h->fb_pool[FRAME_INDEX_POS + 1];
-    frame.payload     = &h->fb_pool[FRAME_PAYLOAD_POS(frame.func)];
+    frame.func = h->fb_pool[FRAME_FUNC_POS];
+    frame.index = (uint16_t)h->fb_pool[FRAME_INDEX_POS] << 8 | (uint16_t)h->fb_pool[FRAME_INDEX_POS + 1];
+    frame.payload = &h->fb_pool[FRAME_PAYLOAD_POS(frame.func)];
     frame.payload_len = IS_RESP_FUNC(frame.func) ? (h->frame_len - 10) : (h->frame_len - 9);
-    frame.ret         = IS_RESP_FUNC(frame.func) ? (h->fb_pool[FRAME_RET_POS]) : 0x00;
+    frame.ret = IS_RESP_FUNC(frame.func) ? (h->fb_pool[FRAME_RET_POS]) : 0x00;
 
     /* search for func, and call it's cb function */
-    if (h->func_and_cb_list) {
+    if (h->func_and_cb_list)
+    {
         const func_and_cb_t* pos = h->func_and_cb_list;
 
-        while (pos->cb) {
-            if (pos->func == frame.func) {
+        while (pos->cb)
+        {
+            if (pos->func == frame.func)
+            {
 #if PP_TIMEOUT_DET_EN
                 list_for_each(pos, &h->timeout_pkg_list.list)
                 {
-                    if (((timeout_pkg_t*)pos)->frame_func == frame.func) {
+                    if (((timeout_pkg_t*)pos)->frame_func == frame.func)
+                    {
                         list_del(pos);
                         PP_FREE(pos);
                         break;
@@ -402,7 +436,8 @@ static void parse_frame(struct pp_handle* h)
                 pos->cb(h, &frame);
                 break;
             }
-            else {
+            else
+            {
                 pos++;
             }
         }
