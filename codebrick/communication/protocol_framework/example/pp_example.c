@@ -77,7 +77,7 @@ pp_err_t pp_example_handle_init(struct pp_example_handle* h, hw_send_cb send, no
 {
     PP_ASSERT(h);
 
-    pp_handle_init(&h->pp, g_example_func_and_cb_list, send, example_notify_cb, NULL, NULL);
+    pp_handle_init(&h->pp, g_example_func_and_cb_list, send, example_notify_cb, NULL, NULL, NULL, NULL);
     h->notify_cb = notify;
 
     return PP_EOK;

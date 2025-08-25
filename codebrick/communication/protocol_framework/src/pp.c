@@ -31,6 +31,7 @@
 #define FRAME_INDEX_POS (4)
 #define FRAME_FUNC_POS (6)
 #define FRAME_RET_POS (7)
+#define FRAME_MIN_LEN (7)
 #define FRAME_PAYLOAD_POS(FUNC) (IS_RESP_FUNC(FUNC) ? (8) : (7))
 
 /* Check is timeout */
@@ -97,7 +98,7 @@ static inline void package_subtract_u32(const uint8_t** frame, uint32_t* u32_dat
     *u32_data = (uint32_t)buf[0] << 24 | (uint32_t)buf[1] << 16 | (uint32_t)buf[2] << 8 | (uint32_t)buf[3];
 }
 
-pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stashed_cb data_stashed, data_parse_cb data_parse)
+pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stashed_cb data_stashed, data_parse_cb data_parse, ringbuffer_lock ringbuffer_lock, ringbuffer_unlock ringbuffer_unlock)
 {
     PP_ASSERT(h);
 
@@ -106,6 +107,8 @@ pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_
     h->notify_cb = notify;
     h->data_stashed_cb = data_stashed;
     h->data_parse_cb = data_parse;
+    h->ringbuffer_lock = ringbuffer_lock;
+    h->ringbuffer_unlock = ringbuffer_unlock;
 
     h->rx_poll_step = RX_POLL_WAIT_HEAD1;
     h->fb_save_index = 0;
@@ -205,8 +208,30 @@ pp_err_t pp_send(struct pp_handle* h, const frame_t* f, uint16_t timeout)
 uint16_t pp_save_hw_recv_data(struct pp_handle* h, const uint8_t* data, uint16_t len)
 {
     PP_ASSERT(h && data && (len > 0));
+    uint16_t rel;
 
-    uint16_t rel = ringbuffer_put(&h->rb, data, len);
+    if (h->ringbuffer_lock)
+    {
+        h->ringbuffer_lock();
+    }
+    rel = ringbuffer_put(&h->rb, data, len);
+
+    /* When the buffer has enough data for a minimal frame header, notify the poll thread. */
+    if (h->data_stashed_cb && (ringbuffer_data_len(&h->rb) >= FRAME_MIN_LEN))
+    {
+        if (h->ringbuffer_unlock)
+        {
+            h->ringbuffer_unlock();
+        }
+        h->data_stashed_cb();
+    }
+    else
+    {
+        if (h->ringbuffer_unlock)
+        {
+            h->ringbuffer_unlock();
+        }
+    }
 
     return (len - rel);
 }
@@ -325,6 +350,11 @@ void pp_poll(struct pp_handle* h)
         POLL_DELAY;
     }
 
+    if (h->ringbuffer_lock)
+    {
+        h->ringbuffer_lock();
+    }
+
     /* Process data using state machine until we have a complete frame */
     while (ringbuffer_data_len(&h->rb) > 0)
     {
@@ -432,6 +462,11 @@ void pp_poll(struct pp_handle* h)
                 break;
             }
         }
+    }
+
+    if (h->ringbuffer_unlock)
+    {
+        h->ringbuffer_unlock();
     }
 }
 

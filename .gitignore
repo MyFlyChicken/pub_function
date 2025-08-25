@@ -1,6 +1,7 @@
 /build
 *.o
 *.out
+*.a
 CMakeCache.txt
 CMakeFiles
 cmake_install.cmake
