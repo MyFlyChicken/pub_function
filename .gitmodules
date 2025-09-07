@@ -4,3 +4,6 @@
 [submodule "eventos_copy"]
 	path = eventos_copy
 	url = git@github.com:MyFlyChicken/eventos-copy.git
+[submodule "codebrick/pubsub"]
+	path = codebrick/pubsub
+	url = git@github.com:jaracil/pubsub-c.git
