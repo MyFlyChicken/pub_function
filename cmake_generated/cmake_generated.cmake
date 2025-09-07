@@ -20,6 +20,11 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c/circle.c
     ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c/rect.c
     ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/oop_c/shape.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/pubsub/src/pubsub.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/pubsub/src/psqueue_b.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/pubsub/src/psqueue_ll.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/pubsub/src/sync_linux.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/pubsub/src/sync_freertos.c
     ${CMAKE_CURRENT_SOURCE_DIR}/os/polling/src/polling.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_key.c
@@ -35,8 +40,9 @@ set(sources_SRCS ${sources_SRCS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_oop_c.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_c11_generic.c
     ${CMAKE_CURRENT_SOURCE_DIR}/test/test_binary_search.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/test/test_pubsub.c
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src/unity.c
-    
+   
 )
 
 message(${CMAKE_CURRENT_SOURCE_DIR})
@@ -57,6 +63,7 @@ set(include_c_DIRS ${include_c_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/test
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/src
     ${CMAKE_CURRENT_SOURCE_DIR}/UnityTesting/examples
+    ${CMAKE_CURRENT_SOURCE_DIR}/codebrick/pubsub/src
     ${CMAKE_CURRENT_SOURCE_DIR}
 )
 message(${include_c_DIRS})

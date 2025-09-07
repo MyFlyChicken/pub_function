@@ -48,11 +48,38 @@ set(link_LIBS)
 set(compiler_OPTS)
 
 
+# ==========================
+# Queue/Sync selectable macros (Solution A)
+# Usage:
+#   cmake -S . -B build -DQUEUE_IMPL=LL        # Linked-list queue (no priority)
+#   cmake -S . -B build -DQUEUE_IMPL=BUCKET    # Bucket priority queue (default)
+#   cmake -S . -B build -DSYNC_IMPL=FREERTOS   # Or LINUX (default)
+# ==========================
+set(QUEUE_IMPL "BUCKET" CACHE STRING "Queue impl: BUCKET or LL")
+set_property(CACHE QUEUE_IMPL PROPERTY STRINGS BUCKET LL)
+
+if(QUEUE_IMPL STREQUAL "LL")
+    add_compile_definitions(PS_QUEUE_CUSTOM PS_QUEUE_LL)
+else()
+    add_compile_definitions(PS_QUEUE_CUSTOM PS_QUEUE_BUCKET)
+endif()
+
+set(SYNC_IMPL "LINUX" CACHE STRING "Sync impl: LINUX or FREERTOS")
+set_property(CACHE SYNC_IMPL PROPERTY STRINGS LINUX FREERTOS)
+
+if(SYNC_IMPL STREQUAL "FREERTOS")
+    add_compile_definitions(PS_SYNC_CUSTOM PS_SYNC_FREERTOS)
+else()
+    add_compile_definitions(PS_SYNC_CUSTOM PS_SYNC_LINUX)
+endif()
+
+
 
 # Now call generated cmake
 # This will add script generated
 # information to the project
 include("cmake_generated/cmake_generated.cmake")
+
 
 # Link directories setup
 # Must be before executable is added

@@ -15,4 +15,5 @@ void test_main(void)
     test_oop_c();
     test_c11_generic();
     test_binary_search();
+    test_pubsub();
 }

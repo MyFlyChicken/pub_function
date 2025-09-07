@@ -60,6 +60,7 @@ void test_key(void);
 void test_oop_c(void);
 void test_c11_generic(void);
 void test_binary_search(void);
+int test_pubsub(void);
 /* ----------------------- Extern function ----------------------------------*/
 
 /* ----------------------- End ----------------------------------------------*/
