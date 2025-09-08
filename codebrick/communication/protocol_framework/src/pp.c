@@ -98,17 +98,18 @@ static inline void package_subtract_u32(const uint8_t** frame, uint32_t* u32_dat
     *u32_data = (uint32_t)buf[0] << 24 | (uint32_t)buf[1] << 16 | (uint32_t)buf[2] << 8 | (uint32_t)buf[3];
 }
 
-pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stashed_cb data_stashed, data_parse_cb data_parse, ringbuffer_lock ringbuffer_lock, ringbuffer_unlock ringbuffer_unlock)
+pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stash_cb data_stash, data_copied_cb data_copied, ringbuffer_lock ringbuffer_lock, ringbuffer_unlock ringbuffer_unlock, data_parse_cplt_cb data_parse_cplt)
 {
     PP_ASSERT(h);
 
     h->func_and_cb_list = list;
     h->send_cb = send;
     h->notify_cb = notify;
-    h->data_stashed_cb = data_stashed;
-    h->data_parse_cb = data_parse;
+    h->data_stash_cb = data_stash;
+    h->data_copied_cb = data_copied;
     h->ringbuffer_lock = ringbuffer_lock;
     h->ringbuffer_unlock = ringbuffer_unlock;
+    h->data_parse_cplt_cb = data_parse_cplt;
 
     h->rx_poll_step = RX_POLL_WAIT_HEAD1;
     h->fb_save_index = 0;
@@ -210,27 +211,17 @@ uint16_t pp_save_hw_recv_data(struct pp_handle* h, const uint8_t* data, uint16_t
     PP_ASSERT(h && data && (len > 0));
     uint16_t rel;
 
-    if (h->ringbuffer_lock)
-    {
-        h->ringbuffer_lock();
-    }
+    h->ringbuffer_lock ? h->ringbuffer_lock() : (void)0;
     rel = ringbuffer_put(&h->rb, data, len);
-
     /* When the buffer has enough data for a minimal frame header, notify the poll thread. */
-    if (h->data_stashed_cb && (ringbuffer_data_len(&h->rb) >= FRAME_MIN_LEN))
+    if (h->data_stash_cb && (rel > 0))
     {
-        if (h->ringbuffer_unlock)
-        {
-            h->ringbuffer_unlock();
-        }
-        h->data_stashed_cb();
+        h->ringbuffer_unlock ? h->ringbuffer_unlock() : (void)0;
+        h->data_stash_cb();
     }
     else
     {
-        if (h->ringbuffer_unlock)
-        {
-            h->ringbuffer_unlock();
-        }
+        h->ringbuffer_unlock ? h->ringbuffer_unlock() : (void)0;
     }
 
     return (len - rel);
@@ -341,31 +332,16 @@ void pp_poll(struct pp_handle* h)
     check_is_timeout_occur(h);
 #endif
 
-    if (h->data_parse_cb)
-    {
-        h->data_parse_cb(); /* Notify that data can be parsed */
-    }
-    else
-    {
-        POLL_DELAY;
-    }
+    h->data_copied_cb ? h->data_copied_cb() : POLL_DELAY;
+    h->ringbuffer_lock ? h->ringbuffer_lock() : (void)0;
 
-    if (h->ringbuffer_lock)
-    {
-        h->ringbuffer_lock();
-    }
-
-    /* Process data using state machine until we have a complete frame */
     while (ringbuffer_data_len(&h->rb) > 0)
     {
-        uint8_t ch;
-
-        /* If we're waiting for a complete frame, check if we have enough data */
+        /* 如果已知剩余需要一次性读取的长度，沿用原来的整块读取 */
         if (h->rx_poll_step == RX_POLL_WAIT_ALL)
         {
             if (ringbuffer_data_len(&h->rb) >= (h->frame_len - h->fb_save_index))
             {
-                /* Read the remaining frame data */
                 uint32_t remaining_len = h->frame_len - h->fb_save_index;
                 uint32_t actual_len = ringbuffer_get(&h->rb, &h->fb_pool[h->fb_save_index], remaining_len);
                 if (actual_len == remaining_len)
@@ -373,7 +349,7 @@ void pp_poll(struct pp_handle* h)
                     h->fb_save_index = h->frame_len;
                     parse_frame(h);
                     reset_frame_state(h);
-                    continue; /* Process next frame if available */
+                    continue;
                 }
                 else
                 {
@@ -384,75 +360,107 @@ void pp_poll(struct pp_handle* h)
             }
             else
             {
-                break; /* Not enough data for complete frame, wait for more */
+                break;
             }
         }
 
-        /* Read one byte for state machine processing */
-        if (ringbuffer_getchar(&h->rb, &ch) != 1)
+        /* 等待帧头阶段的快速路径：丢弃非帧头字节（尤其是连续的0xFF dummy） */
+        if (h->rx_poll_step == RX_POLL_WAIT_HEAD1)
         {
-            break; /* No more data available */
-        }
-
-        /* Check buffer overflow before writing */
-        if (h->fb_save_index >= PP_FRAMEBUFFER_LEN)
-        {
-            PP_LOG_E("Frame buffer overflow, reset state.");
-            reset_frame_state(h);
-            continue;
-        }
-
-        h->fb_pool[h->fb_save_index++] = ch;
-
-        /* State machine processing */
-        switch (h->rx_poll_step)
-        {
-            case RX_POLL_WAIT_HEAD1:
+            uint8_t ch;
+            int progressed = 0;
+            /* 快速丢弃直到读到第一个帧头字节 FRAME_HEAD1(0x6A) 为止 */
+            while (ringbuffer_getchar(&h->rb, &ch) == 1)
             {
                 if (ch == FRAME_HEAD1)
                 {
+                    /* 命中第一个帧头，开始记录到帧缓冲 */
+                    h->fb_pool[0] = ch;
+                    h->fb_save_index = 1;
                     h->rx_poll_step = RX_POLL_WAIT_HEAD2;
+                    progressed = 1;
+                    break;
                 }
-                else
-                {
-                    reset_frame_state(h);
-                }
+                /* 否则直接丢弃该字节（大多数为0xFF的dummy） */
+            }
+
+            if (!progressed)
+            {
+                /* 没有更多数据可读，等待下次 */
                 break;
             }
+            /* 命中后继续下面的状态机处理 */
+        }
+
+        /* 下面各状态仅在需要时才写入 fb_pool，避免无效写入 */
+        switch (h->rx_poll_step)
+        {
             case RX_POLL_WAIT_HEAD2:
             {
+                uint8_t ch;
+                if (ringbuffer_getchar(&h->rb, &ch) != 1)
+                    goto __exit_loop;
                 if (ch == FRAME_HEAD2)
                 {
+                    h->fb_pool[h->fb_save_index++] = ch;
                     h->rx_poll_step = RX_POLL_WAIT_LEN;
+
+                    /* 批量拉取 func(2) + rand(2) + len(2) = 6 字节（若可用） */
+                    uint32_t need = (FRAME_LEN_POS + 2) - h->fb_save_index; /* = 9+2 - 当前(3) = 8，考虑前面逻辑，这里是再填充到 len 字段结束 */
+                    uint32_t avail = ringbuffer_data_len(&h->rb);
+                    if (avail >= need)
+                    {
+                        uint32_t got = ringbuffer_get(&h->rb, &h->fb_pool[h->fb_save_index], need);
+                        if (got == need)
+                        {
+                            h->fb_save_index += need;
+                            /* 已有 func/rand/len，直接进入 WAIT_LEN 去解析长度 */
+                            h->rx_poll_step = RX_POLL_WAIT_LEN;
+                        }
+                    }
                 }
                 else
                 {
-                    reset_frame_state(h);
-                    /* Check if current byte could be new frame start */
+                    /* 支持重叠：这个字节若是 HEAD1，保留；否则回到等 HEAD1 快速丢弃路径 */
                     if (ch == FRAME_HEAD1)
                     {
-                        h->fb_pool[h->fb_save_index++] = ch;
+                        h->fb_pool[0] = ch;
+                        h->fb_save_index = 1;
                         h->rx_poll_step = RX_POLL_WAIT_HEAD2;
+                    }
+                    else
+                    {
+                        reset_frame_state(h);
                     }
                 }
                 break;
             }
             case RX_POLL_WAIT_LEN:
             {
-                if (h->fb_save_index >= (FRAME_LEN_POS + 2))
+                if (h->fb_save_index < (FRAME_LEN_POS + 2))
                 {
-                    h->frame_len = read_u16_be(&h->fb_pool[FRAME_LEN_POS]);
-
-                    /* Validate frame length */
-                    if (h->frame_len > PP_FRAMEBUFFER_LEN)
-                    {
-                        PP_LOG_E("Frame length too long: %d", h->frame_len);
-                        reset_frame_state(h);
-                        break;
-                    }
-                    /* prepare to get remaining all frame */
-                    h->rx_poll_step = RX_POLL_WAIT_ALL;
+                    uint32_t need = (FRAME_LEN_POS + 2) - h->fb_save_index;
+                    uint32_t avail = ringbuffer_data_len(&h->rb);
+                    if (avail == 0)
+                        goto __exit_loop;
+                    uint32_t take = (need <= avail) ? need : avail;
+                    uint32_t got = ringbuffer_get(&h->rb, &h->fb_pool[h->fb_save_index], take);
+                    h->fb_save_index += got;
+                    if (h->fb_save_index < (FRAME_LEN_POS + 2))
+                        goto __exit_loop;
                 }
+
+                uint16_t payload_len = read_u16_be(&h->fb_pool[FRAME_LEN_POS]);
+                h->frame_len = payload_len;
+
+                if (h->frame_len > PP_FRAMEBUFFER_LEN)
+                {
+                    PP_LOG_E("Frame length too long: %d", h->frame_len);
+                    reset_frame_state(h);
+                    break;
+                }
+
+                h->rx_poll_step = RX_POLL_WAIT_ALL;
                 break;
             }
             default:
@@ -464,10 +472,9 @@ void pp_poll(struct pp_handle* h)
         }
     }
 
-    if (h->ringbuffer_unlock)
-    {
-        h->ringbuffer_unlock();
-    }
+__exit_loop:
+    h->ringbuffer_unlock ? h->ringbuffer_unlock() : (void)0;
+    h->data_parse_cplt_cb ? h->data_parse_cplt_cb() : (void)0;
 }
 
 /**

@@ -54,14 +54,14 @@ extern "C"
         uint16_t index;         /* The index of this frame */
         func_t func;            /* The function code of this frame */
         ret_t ret;              /* The status returned in the ack-frame */
-        const uint8_t* payload; /* The payload getted from this frame */
         uint16_t payload_len;   /* The len(bytes) of payload */
+        const uint8_t* payload; /* The payload getted from this frame */
     } frame_t;
 
     /* payload parse callback function */
-    typedef void (*parse_cb)(struct pp_handle* h, frame_t* f);
-    typedef void (*data_stashed_cb)(void);
-    typedef void (*data_parse_cb)(void);
+    typedef void (*data_stash_cb)(void);
+    typedef void (*data_copied_cb)(void);
+    typedef void (*data_parse_cplt_cb)(void);
 
     /* function code and it's parse fucntion */
     typedef struct
@@ -126,18 +126,19 @@ extern "C"
 
         rx_poll_step_e rx_poll_step; /* the step of analyze rx datas, like state-machine */
 
-        hw_send_cb send_cb;                  /* Stcak will call this cb to send data in hardware */
-        notify_cb notify_cb;                 /* notify upper level some thing */
-        data_stashed_cb data_stashed_cb;     /* notify receive data is stashed */
-        data_parse_cb data_parse_cb;         /* notify upper data can parse */
-        ringbuffer_lock ringbuffer_lock;     /* lock the ringbuffer */
-        ringbuffer_unlock ringbuffer_unlock; /* unlock the ringbuffer */
+        hw_send_cb send_cb;                    /* Stcak will call this cb to send data in hardware */
+        notify_cb notify_cb;                   /* notify upper level some thing */
+        data_stash_cb data_stash_cb;           /* notify receive data is stashed */
+        data_copied_cb data_copied_cb;         /* notify data in frame buffer is copied */
+        data_parse_cplt_cb data_parse_cplt_cb; /* notify ringbuffer data parse is cplt */
+        ringbuffer_lock ringbuffer_lock;       /* lock the ringbuffer */
+        ringbuffer_unlock ringbuffer_unlock;   /* unlock the ringbuffer */
     };
 
     void pp_log_hex(const uint8_t* data, uint16_t len);
     ret_t pp_trans_err_to_ret(pp_err_t err);
     pp_err_t pp_trans_ret_to_err(ret_t ret);
-    pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stashed_cb data_stashed, data_parse_cb data_parse, ringbuffer_lock ringbuffer_lock, ringbuffer_unlock ringbuffer_unlock);
+    pp_err_t pp_handle_init(struct pp_handle* h, const func_and_cb_t* list, hw_send_cb send, notify_cb notify, data_stash_cb data_stash, data_copied_cb data_copied, ringbuffer_lock ringbuffer_lock, ringbuffer_unlock ringbuffer_unlock, data_parse_cplt_cb data_parse_cplt);
     pp_err_t pp_send(struct pp_handle* h, const frame_t* f, uint16_t timeout);
 
     void package_append_str(uint8_t** frame, const uint8_t* pdata, uint16_t len);
