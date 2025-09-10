@@ -40,13 +40,13 @@ extern "C"
     /* pp basic structure defined */
     struct pp_basic
     {
-        struct ppVtbl const* vptr; /* <== pp_basic's Virtual Pointer */
-        ringbuffer_t rb;           /* ringbuffer for rx */
-        uint8_t* rb_pool;          /* the pool of ringbuffer */
+        struct ppVtbl const* vptr;    /* <== pp_basic's Virtual Pointer */
+        ringbuffer_t         rb;      /* ringbuffer for rx */
+        uint8_t*             rb_pool; /* the pool of ringbuffer */
 
-        uint8_t* fb_pool;                    /* frame buffer for saving one frame */
-        uint32_t fb_size;                    /* the size of frame buffer */
-        ringbuffer_lock ringbuffer_lock;     /* lock the ringbuffer */
+        uint8_t*          fb_pool;           /* frame buffer for saving one frame */
+        uint32_t          fb_size;           /* the size of frame buffer */
+        ringbuffer_lock   ringbuffer_lock;   /* lock the ringbuffer */
         ringbuffer_unlock ringbuffer_unlock; /* unlock the ringbuffer */
     };
 
@@ -54,6 +54,10 @@ extern "C"
     {
         void (*dtor)(struct pp_basic* const me); /* destructor */
         void (*poll)(struct pp_basic* const me); /* poll to parse data in ringbuffer */
+        void (*append_str)(uint8_t** frame, const char* str, uint32_t actual_len, uint32_t demand_len);
+        uint8_t (*crc8)(uint8_t init_value, const uint8_t* data, uint32_t len);
+        uint16_t (*crc16)(uint16_t init_value, const uint8_t* data, uint32_t len);
+        uint32_t (*crc32)(uint32_t init_value, const uint8_t* data, uint32_t len);
     };
 
     static inline void pp_basic_lock(struct pp_basic* const me)
@@ -66,14 +70,19 @@ extern "C"
         me->ringbuffer_unlock ? me->ringbuffer_unlock() : (void)0;
     }
 
-    static inline void pp_basic_get_rb_ch(struct pp_basic* const me, uint8_t* u8_data)
+    static inline uint32_t pp_basic_get_rb_ch(struct pp_basic* const me, uint8_t* u8_data)
     {
-        ringbuffer_get(&me->rb, u8_data, 1);
+        return ringbuffer_get(&me->rb, u8_data, 1);
     }
 
     static inline uint32_t pp_basic_get_rb_len(struct pp_basic* const me)
     {
         return ringbuffer_data_len(&me->rb);
+    }
+
+    static inline uint32_t pp_basic_get_rb_data(struct pp_basic* const me, uint8_t* data, uint32_t len)
+    {
+        return ringbuffer_get(&me->rb, data, len);
     }
 
     static inline void pp_basic_append_byte(uint8_t** frame, uint8_t data)
@@ -129,7 +138,7 @@ extern "C"
         return ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | (uint32_t)buf[3];
     }
 
-    void pp_basic_ctor(struct pp_basic* const me, uint8_t* rb_pool, uint32_t rb_size, uint8_t* fb_pool, uint32_t fb_size, ringbuffer_lock lock, ringbuffer_unlock unlock);
+    void     pp_basic_ctor(struct pp_basic* const me, uint8_t* rb_pool, uint32_t rb_size, uint8_t* fb_pool, uint32_t fb_size, ringbuffer_lock lock, ringbuffer_unlock unlock);
     uint32_t pp_basic_push_data(struct pp_basic* const me, const uint8_t* data, uint32_t len);
 
 #ifdef __cplusplus

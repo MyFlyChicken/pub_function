@@ -1,0 +1,11 @@
+import rtconfig
+from building import *
+
+cwd     = GetCurrentDir()
+path    = [cwd, str(Dir('#'))]
+path    += '/pp/inc'
+src     = Glob('*.c') + Glob('*.cpp')
+
+group = DefineGroup('offline/pp', src, depend = [''], CPPPATH = path)
+
+Return('group')

@@ -1,17 +1,16 @@
 /**
  * @file pp_ringbuffer.c
- * @author yuyf ()
+ * @author 
  * @brief 
  * @version 0.1
- * @date 2024-12-11
+ * @date 2025-06-27
  * 
- * @copyright Copyright (c) 2024 常山赵子龙
  * 
  * @par 修改日志:
  * <table>
  * <caption id="multi_row">$</caption>
  * <tr><th>Date       <th>Version <th>Author  <th>Description
- * <tr><td>2024-12-11 <td>v1.0     <td>chen     <td>内容
+ * <tr><td>2025-06-27 <td>v1.0     <td>     <td>内容
  * </table>
  * @section 
  * @code 
@@ -160,35 +159,51 @@ uint32_t ringbuffer_get(ringbuffer_t* rb, uint8_t* ptr, uint32_t length)
     return length;
 }
 
-uint32_t ringbuffer_peek(ringbuffer_t* rb, uint8_t** ptr)
+/**
+ * @brief Peeks a specified number of bytes from the ringbuffer without removing them.
+ *
+ * @param rb The ringbuffer handle.
+ * @param ptr The buffer to copy the peeked data into.
+ * @param length The number of bytes to peek.
+ * @return The actual number of bytes peeked (can be less than requested if not enough data is available).
+ */
+uint32_t ringbuffer_peek(ringbuffer_t* rb, uint8_t* ptr, uint32_t length)
 {
     uint32_t size;
+    uint32_t read_index;
 
-    *ptr = NULL;
+    if (!ptr) {
+        return 0;
+    }
 
-    /* whether has enough data  */
+    /* Use a temporary read_index to avoid modifying the actual one */
+    read_index = rb->read_index;
+
+    /* Check how much data is available */
     size = ringbuffer_data_len(rb);
 
-    /* no data */
+    /* If no data, return 0 */
     if (size == 0) {
         return 0;
     }
 
-    *ptr = &rb->buffer_ptr[rb->read_index];
-
-    if ((uint32_t)(rb->buffer_size - rb->read_index) > size) {
-        rb->read_index += size;
-
-        return size;
+    /* Don't peek more data than is available */
+    if (length > size) {
+        length = size;
     }
 
-    size = rb->buffer_size - rb->read_index;
+    /* If the data is not wrapped around the end of the buffer */
+    if (rb->buffer_size - read_index >= length) {
+        memcpy(ptr, &rb->buffer_ptr[read_index], length);
+    }
+    else {
+        /* The data is wrapped, must perform two copies */
+        uint32_t first_part_size = rb->buffer_size - read_index;
+        memcpy(ptr, &rb->buffer_ptr[read_index], first_part_size);
+        memcpy(ptr + first_part_size, &rb->buffer_ptr[0], length - first_part_size);
+    }
 
-    /* we are going into the other side of the mirror */
-    rb->read_mirror = ~rb->read_mirror;
-    rb->read_index  = 0;
-
-    return size;
+    return length;
 }
 
 uint32_t ringbuffer_putchar(ringbuffer_t* rb, const uint8_t ch)
@@ -262,21 +277,22 @@ uint32_t ringbuffer_getchar(ringbuffer_t* rb, uint8_t* ch)
 uint32_t ringbuffer_data_len(ringbuffer_t* rb)
 {
     switch (ringbuffer_status(rb)) {
-    case RINGBUFFER_EMPTY:
-        return 0;
-    case RINGBUFFER_FULL:
-        return rb->buffer_size;
-    case RINGBUFFER_HALFFULL:
-    default: {
-        uint32_t wi = rb->write_index, ri = rb->read_index;
+        case RINGBUFFER_EMPTY:
+            return 0;
+        case RINGBUFFER_FULL:
+            return rb->buffer_size;
+        case RINGBUFFER_HALFFULL:
+        default:
+        {
+            uint32_t wi = rb->write_index, ri = rb->read_index;
 
-        if (wi > ri) {
-            return wi - ri;
+            if (wi > ri) {
+                return wi - ri;
+            }
+            else {
+                return rb->buffer_size - (ri - wi);
+            }
         }
-        else {
-            return rb->buffer_size - (ri - wi);
-        }
-    }
     }
 }
 
