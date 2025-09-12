@@ -455,6 +455,8 @@ struct expand1_handle* pp_expand1_init(void)
         .crc16 = _expand1_crc16,
         .crc32 = NULL,
         .poll = _expand1_poll,
+        .ringbuffer_lock = NULL,
+        .ringbuffer_unlock = NULL,
     };
 
     struct expand1_handle* h = PP_MALLOC(sizeof(struct expand1_handle));
@@ -465,7 +467,7 @@ struct expand1_handle* pp_expand1_init(void)
     }
 
     memset(h, 0, sizeof(struct expand1_handle));
-    pp_basic_ctor(&h->basic, _rb_buffer, sizeof(_rb_buffer), _fb_buffer, sizeof(_fb_buffer), NULL, NULL);
+    pp_basic_ctor(&h->basic, _rb_buffer, sizeof(_rb_buffer), _fb_buffer, sizeof(_fb_buffer));
     h->basic.vptr = &expand1_vtable;
 
     return h;

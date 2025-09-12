@@ -75,10 +75,8 @@ extern "C"
         ringbuffer_t rb;           /* ringbuffer for rx */
         uint8_t* rb_pool;          /* the pool of ringbuffer */
 
-        uint8_t* fb_pool;                    /* frame buffer for saving one frame */
-        uint32_t fb_size;                    /* the size of frame buffer */
-        ringbuffer_lock ringbuffer_lock;     /* lock the ringbuffer */
-        ringbuffer_unlock ringbuffer_unlock; /* unlock the ringbuffer */
+        uint8_t* fb_pool; /* frame buffer for saving one frame */
+        uint32_t fb_size; /* the size of frame buffer */
     };
 
     struct ppVtbl
@@ -89,16 +87,19 @@ extern "C"
         uint8_t (*crc8)(uint8_t init_value, const uint8_t* data, uint32_t len);
         uint16_t (*crc16)(uint16_t init_value, const uint8_t* data, uint32_t len);
         uint32_t (*crc32)(uint32_t init_value, const uint8_t* data, uint32_t len);
+
+        ringbuffer_lock ringbuffer_lock;     /* lock the ringbuffer */
+        ringbuffer_unlock ringbuffer_unlock; /* unlock the ringbuffer */
     };
 
     static inline void pp_basic_lock(struct pp_basic* const me)
     {
-        me->ringbuffer_lock ? me->ringbuffer_lock() : (void)0;
+        me->vptr->ringbuffer_lock ? me->vptr->ringbuffer_lock() : (void)0;
     }
 
     static inline void pp_basic_unlock(struct pp_basic* const me)
     {
-        me->ringbuffer_unlock ? me->ringbuffer_unlock() : (void)0;
+        me->vptr->ringbuffer_unlock ? me->vptr->ringbuffer_unlock() : (void)0;
     }
 
     static inline uint32_t pp_basic_get_rb_ch(struct pp_basic* const me, uint8_t* u8_data)
@@ -151,25 +152,29 @@ extern "C"
 
     static inline uint16_t pp_basic_read_u16_be(const uint8_t* buf)
     {
-        return ((uint16_t)buf[1] << 8) | (uint16_t)buf[0];
+        /* BE: buf[0]=MSB, buf[1]=LSB */
+        return ((uint16_t)buf[0] << 8) | (uint16_t)buf[1];
     }
 
     static inline uint32_t pp_basic_read_u32_be(const uint8_t* buf)
     {
-        return ((uint32_t)buf[3] << 24) | ((uint32_t)buf[2] << 16) | ((uint32_t)buf[1] << 8) | (uint32_t)buf[0];
+        /* BE: buf[0]=MSB ... buf[3]=LSB */
+        return ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | (uint32_t)buf[3];
     }
 
     static inline uint16_t pp_basic_read_u16_le(const uint8_t* buf)
     {
-        return ((uint16_t)buf[0] << 8) | (uint16_t)buf[1];
+        /* LE: buf[0]=LSB, buf[1]=MSB */
+        return ((uint16_t)buf[1] << 8) | (uint16_t)buf[0];
     }
 
     static inline uint32_t pp_basic_read_u32_le(const uint8_t* buf)
     {
-        return ((uint32_t)buf[0] << 24) | ((uint32_t)buf[1] << 16) | ((uint32_t)buf[2] << 8) | (uint32_t)buf[3];
+        /* LE: buf[0]=LSB ... buf[3]=MSB */
+        return ((uint32_t)buf[3] << 24) | ((uint32_t)buf[2] << 16) | ((uint32_t)buf[1] << 8) | (uint32_t)buf[0];
     }
 
-    void pp_basic_ctor(struct pp_basic* const me, uint8_t* rb_pool, uint32_t rb_size, uint8_t* fb_pool, uint32_t fb_size, ringbuffer_lock lock, ringbuffer_unlock unlock);
+    void pp_basic_ctor(struct pp_basic* const me, uint8_t* rb_pool, uint32_t rb_size, uint8_t* fb_pool, uint32_t fb_size);
     uint32_t pp_basic_push_data(struct pp_basic* const me, const uint8_t* data, uint32_t len);
 
 #ifdef __cplusplus
