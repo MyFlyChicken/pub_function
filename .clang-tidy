@@ -1,0 +1,45 @@
+HeaderFilterRegex: ''
+Checks: >
+  -*,
+  clang-diagnostic-*,
+  llvm-*,
+  misc-*,
+  -misc-const-correctness,
+  -misc-include-cleaner,
+  -misc-no-recursion,
+  -misc-non-private-member-variables-in-classes,
+  -misc-unused-parameters,
+  -misc-use-anonymous-namespace,
+  readability-identifier-naming
+
+
+# CamelCase	 MyVariable	每个单词首字母大写（大驼峰）
+# camelBack	 myVariable	首字母小写，后续单词首字母大写（小驼峰）
+# snake_case my_variable	全小写，单词间用下划线分隔
+# UPPER_CASE MY_VARIABLE	全大写，通常用于宏或常量
+# aNy_CasE	 anyThing	  不限制命名风格
+CheckOptions:
+  - key:             readability-identifier-naming.ClassCase
+    value:           snake_case
+  - key:             readability-identifier-naming.EnumCase
+    value:           UPPER_CASE
+  - key:             readability-identifier-naming.FunctionCase
+    value:           snake_case
+  # Exclude from scanning as this is an exported symbol used for fuzzing
+  # throughout the code base.
+  - key:             readability-identifier-naming.FunctionIgnoredRegexp
+    value:           "LLVMFuzzerTestOneInput"
+  - key:             readability-identifier-naming.MemberCase
+    value:           snake_case
+  - key:             readability-identifier-naming.ParameterCase
+    value:           snake_case
+  - key:             readability-identifier-naming.UnionCase
+    value:           snake_case
+  - key:             readability-identifier-naming.VariableCase
+    value:           snake_case
+  - key:             readability-identifier-naming.IgnoreMainLikeFunctions
+    value:           1
+  - key:             readability-redundant-member-init.IgnoreBaseInCopyConstructors
+    value:           1
+  - key:             modernize-use-default-member-init.UseAssignment
+    value:           1
