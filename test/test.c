@@ -17,5 +17,5 @@ int test_main(void)
     test_binary_search();
     test_pubsub();
 
-    return UNITY_END();
+    return -1;
 }
