@@ -1,23 +1,23 @@
-// 指定该工作流的名字
+# 指定该工作流的名字
 name: Cppcheck action
-// 定义触发该工作流的事件，这里是当有 push 到 main 分支时触发
+# 定义触发该工作流的事件，这里是当有 push 到 main 分支时触发
 on:
   push:
   pull_request:
-// 定义工作流的作业，这里只有一个作业，名字为 cppcheck
+# 定义工作流的作业，这里只有一个作业，名字为 cppcheck
 jobs:
   cppcheck:
-    // 指定运行该作业的环境，这里使用最新版本的 Ubuntu
+    # 指定运行该作业的环境，这里使用最新版本的 Ubuntu
     runs-on: ubuntu-latest
-    // 定义作业的步骤
+    # 定义作业的步骤
     steps:
-      // 第一步：检出代码仓库
+      # 第一步：检出代码仓库
       - name: Checkout code
         uses: actions/checkout@v2
-      // 第二步：安装 Cppcheck 工具
+      # 第二步：安装 Cppcheck 工具
       - name: Install Cppcheck
         run: sudo apt-get install -y cppcheck
-      // 第三步：运行 Cppcheck 进行代码静态分析
+      # 第三步：运行 Cppcheck 进行代码静态分析
       - name: Run Cppcheck
         run: cppcheck --enable=warning,portability,performance \
                       --language=c \
