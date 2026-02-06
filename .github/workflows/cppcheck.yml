@@ -18,13 +18,20 @@ jobs:
       - name: Install Cppcheck
         run: sudo apt-get install -y cppcheck
       # 第三步：运行 Cppcheck 进行代码静态分析
+      #        
       - name: Run Cppcheck
+      # --enable 指定使能的检查类型
+      # --language 指定代码语言为 C
+      # --platform 指定目标平台为 unix32
+      # --std 指定代码标准为 C99
+      # --force 强制检查所有文件
+      # -i 用于排除不需要检查的目录 i为ignore的意思
         run: cppcheck --enable=warning,portability,performance \
                       --language=c \
                       --platform=unix32 \
                       --std=c99 \
                       --force . \
-                      -i UnityTesting \
-                      -i os 
+                      -i UnityTesting/ \
+                      -i os/
 
 

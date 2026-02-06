@@ -1,0 +1,41 @@
+#指定工作流的名字
+name: Build and Test
+#定义触发该工作流的事件，这里是当有 push 或 pull request 到
+on:
+  # push:
+  #   branches:
+  #   - master
+  # pull_request:
+  #   branches:
+  #   - master
+  workflow_run:
+    workflows: ["Cppcheck action"]  # 必须与第一个 yml 的 name 一致
+    types:
+      - completed
+jobs:
+  unity_test:
+    runs-on: ubuntu-latest
+    steps:
+      # 第一步 检出代码仓库
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          # 拉取子模块
+          submodules: recursive
+      # 第二步 安装依赖 cmake
+      - nema: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
+      #第三步 cmake构建程序
+      - name: build
+        run: cmake -S . -B build/Debug -G Ninja -DCMAKE_BUILD_TYPE=debug -DEXTRA_C_FLAGS="-Werror";cmake --build build
+      #第四步 执行unity testh函数
+      - name: unity test
+      # | 用于表示接下来的内容是一个多行脚本，请原样保留换行符，不要把它们挤成一行
+        run: |
+          cd build/Debug
+          set timeout 10
+          sudo ./function_test 
+
+
+
+
