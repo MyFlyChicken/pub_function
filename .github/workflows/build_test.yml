@@ -29,7 +29,8 @@ jobs:
       - name: build
         run: |
           cmake -DCMAKE_BUILD_TYPE=debug -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_TOOLCHAIN_FILE="$PWD/cmake/linux_gcc.cmake" -S . -B build/Debug -G Ninja
-      #第四步 执行unity testh函数 # cmake --build build/Debug -j 8
+          cmake --build build/Debug -j 8
+      #第四步 执行unity testh函数 
       - name: unity test
       # | 用于表示接下来的内容是一个多行脚本，请原样保留换行符，不要把它们挤成一行
         run: |
