@@ -3,7 +3,7 @@ name: Cppcheck action
 // 定义触发该工作流的事件，这里是当有 push 到 main 分支时触发
 on:
   push:
-    branches: [ main ]
+  pull_request:
 // 定义工作流的作业，这里只有一个作业，名字为 cppcheck
 jobs:
   cppcheck:
