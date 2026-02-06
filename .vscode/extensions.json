@@ -1,10 +1,8 @@
 {
+    // List of extensions to recommend for this workspace
     "recommendations": [
         "ms-vscode.cpptools",
         "ms-vscode.cmake-tools",
-        "marus25.cortex-debug",
-        "twxs.cmake",
-        "dan-c-underwood.arm",
-        "zixuanwang.linkerscript"
+        "twxs.cmake"
     ]
 }

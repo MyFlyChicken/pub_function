@@ -4,7 +4,6 @@
 #include "pub_memory.h"
 #include "pub_macro.h"
 #include "../mf_log.h"
-#include "../memory_operate.h"
 
 #define VA_SPRINTF_BUFFER 512
 
