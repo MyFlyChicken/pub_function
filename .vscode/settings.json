@@ -1,4 +1,22 @@
 {
     "editor.formatOnSave": true,
-    
+    // 1. 指定使用 cppcheck 作为后端
+    "c-cpp-flylint.cppcheck.enable": true,
+    // 2. 指向你的 cppcheck 可执行程序路径
+    "c-cpp-flylint.cppcheck.executable": "cppcheck",
+    // 3. 核心：传递 MISRA 参数
+    // --addon=misra 会告诉 cppcheck 调用其内部的 misra.py 脚本
+    // 建议同时开启 --inline-suppr 以便在代码中手动忽略某些误报
+    "c-cpp-flylint.cppcheck.standard": [
+        "c11"
+    ],
+    "c-cpp-flylint.cppcheck.extraArgs": [
+        "--addon=misra",
+        "--inline-suppr",
+        "--suppress=missingIncludeSystem"
+    ],
+    // 4. 这里的配置是为了让插件能正确解析输出
+    //"c-cpp-flylint.standard": "c11",
+    "c-cpp-flylint.run": "onSave", // 建议保存时触发，避免实时扫描太卡
+    "c-cpp-flylint.cppcheck.force": true
 }
