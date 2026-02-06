@@ -106,7 +106,7 @@ void test_filter_main(void)
 {
     TEST_FUNCTION_BEGIN();
     UnityBegin("test/test.c");
-    RUN_TEST(test_filter1, 80);
+    RUN_TEST(test_filter1, 200);
     RUN_TEST(test_filter2, 88);
     RUN_TEST(test_filter3, 95);
     RUN_TEST(test_filter4, 90);
