@@ -2,16 +2,16 @@
 name: Build and Test
 #定义触发该工作流的事件，这里是当有 push 或 pull request 到
 on:
-  # push:
-  #   branches:
-  #   - master
-  # pull_request:
-  #   branches:
-  #   - master
-  workflow_run:
-    workflows: ["Cppcheck action"]  # 必须与第一个 yml 的 name 一致
-    types:
-      - completed
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+  # workflow_run:
+  #   workflows: ["Cppcheck action"]  # 必须与第一个 yml 的 name 一致
+  #   types:
+  #     - completed
 jobs:
   unity_test:
     runs-on: ubuntu-latest
