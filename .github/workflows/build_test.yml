@@ -35,4 +35,6 @@ jobs:
       # | 用于表示接下来的内容是一个多行脚本，请原样保留换行符，不要把它们挤成一行
         run: |
           cd build/Debug
+          # 对生成的可执行文件添加执行权限，并设置超时时间为10秒，防止测试程序进入死循环导致工作流卡住
+          chmod +x ./function_test
           timeout 10s sudo ./function_test

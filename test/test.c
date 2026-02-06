@@ -1,6 +1,6 @@
 #include "test.h"
 
-void test_main(void)
+int test_main(void)
 {
     test_filter_main();
     test_eb_main();
@@ -16,4 +16,6 @@ void test_main(void)
     test_c11_generic();
     test_binary_search();
     test_pubsub();
+
+    return UNITY_END();
 }

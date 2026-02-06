@@ -20,7 +20,5 @@
 
 int main()
 {
-    test_main();
-
-    return 0;
+    return test_main();
 }

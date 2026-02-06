@@ -17,53 +17,56 @@
 #define __test_H_
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 #define UNITY_INCLUDE_CONFIG_H
 #include "../UnityTesting/src/unity.h"
 
 /* ----------------------- Defines ------------------------------------------*/
-#define TEST_FUNCTION_BEGIN() printf("\n\n===>>>%s begin<<<===\n", __FUNCTION__)
-#define TEST_FUNCTION_END()   printf("===>>>%s end\n\n", __FUNCTION__)
+#define TEST_FUNCTION_BEGIN() printf("\n\n===>>>%s begin<<<===\n", __func__)
+#define TEST_FUNCTION_END() printf("===>>>%s end\n\n", __func__)
 
 /*=======Test Runner Used To Run Each Test Below=====*/
 #define RUN_TEST(TestFunc, TestLineNum)            \
     {                                              \
-        Unity.CurrentTestName       = #TestFunc;   \
+        Unity.CurrentTestName = #TestFunc;         \
         Unity.CurrentTestLineNumber = TestLineNum; \
         Unity.NumberOfTests++;                     \
-        if (TEST_PROTECT()) {                      \
+        if (TEST_PROTECT())                        \
+        {                                          \
             _setUp();                              \
             TestFunc();                            \
         }                                          \
-        if (TEST_PROTECT()) {                      \
+        if (TEST_PROTECT())                        \
+        {                                          \
             tearDown();                            \
         }                                          \
         UnityConcludeTest();                       \
     }
-/* ----------------------- Type definitions ---------------------------------*/
+    /* ----------------------- Type definitions ---------------------------------*/
 
-/* ----------------------- Extern variable ---------------------------------*/
-void test_main(void);
+    /* ----------------------- Extern variable ---------------------------------*/
+    int test_main(void);
 
-void test_filter_main(void);
-void test_eb_main(void);
-void test_blink_main(void);
-void test_mrmem_main(void);
-void test_struct_assign(void);
-void test_ee_device(void);
-void test_async(void);
-void test_polling(void);
-void test_func_queue(void);
-void test_key(void);
-void test_oop_c(void);
-void test_c11_generic(void);
-void test_binary_search(void);
-int test_pubsub(void);
-/* ----------------------- Extern function ----------------------------------*/
+    void test_filter_main(void);
+    void test_eb_main(void);
+    void test_blink_main(void);
+    void test_mrmem_main(void);
+    void test_struct_assign(void);
+    void test_ee_device(void);
+    void test_async(void);
+    void test_polling(void);
+    void test_func_queue(void);
+    void test_key(void);
+    void test_oop_c(void);
+    void test_c11_generic(void);
+    void test_binary_search(void);
+    int test_pubsub(void);
+    /* ----------------------- Extern function ----------------------------------*/
 
-/* ----------------------- End ----------------------------------------------*/
+    /* ----------------------- End ----------------------------------------------*/
 
 #ifdef __cplusplus
 }

@@ -86,7 +86,8 @@ void test_filter3(void)
 void test_filter4(void)
 {
     int16_t tmp;
-    for (int16_t i = 0; i < 10; i++) {
+    for (int16_t i = 0; i < 10; i++)
+    {
         tmp = filter4();
         printf("raw dat:%d\r\n", tmp);
     }

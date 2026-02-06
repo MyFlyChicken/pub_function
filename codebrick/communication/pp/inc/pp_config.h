@@ -76,7 +76,7 @@ extern "C" {
 #ifndef PP_ASSERT
 #define PP_ASSERT(EX)                                                      \
     if (!(EX)) {                                                           \
-        PP_PRINTF("assert fail: %s, %s, %d", #EX, __FUNCTION__, __LINE__); \
+        PP_PRINTF("assert fail: %s, %s, %d", #EX, __func__, __LINE__); \
         while (1)                                                          \
             ;                                                              \
     }
