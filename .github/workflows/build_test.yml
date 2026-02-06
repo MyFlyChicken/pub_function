@@ -23,19 +23,16 @@ jobs:
           # 拉取子模块
           submodules: recursive
       # 第二步 安装依赖 cmake
-      - nema: Install dependencies
+      - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y cmake ninja-build
       #第三步 cmake构建程序
       - name: build
-        run: cmake -S . -B build/Debug -G Ninja -DCMAKE_BUILD_TYPE=debug -DEXTRA_C_FLAGS="-Werror";cmake --build build
+        run: |
+          cmake -S . -B build/Debug -G Ninja -DCMAKE_BUILD_TYPE=debug -DEXTRA_C_FLAGS="-Werror"
+          cmake --build build/Debug -j 8
       #第四步 执行unity testh函数
       - name: unity test
       # | 用于表示接下来的内容是一个多行脚本，请原样保留换行符，不要把它们挤成一行
         run: |
           cd build/Debug
-          set timeout 10
-          sudo ./function_test 
-
-
-
-
+          timeout 10s sudo ./function_test

@@ -31,7 +31,5 @@ jobs:
                       --platform=unix32 \
                       --std=c99 \
                       --force . \
-                      -i UnityTesting/ \
-                      -i os/
-
-
+                      -i ./UnityTesting/ \
+                      -i ./os/
