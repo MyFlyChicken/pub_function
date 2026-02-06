@@ -28,8 +28,7 @@ jobs:
       #第三步 cmake构建程序
       - name: build
         run: |
-      # -DEXTRA_C_FLAGS="-Werror" 即使所有警告都作为错误处理，暂时屏蔽
-          cmake -S . -B build/Debug -G Ninja -DCMAKE_BUILD_TYPE=debug
+          cmake -S . -B build/Debug -G Ninja -DCMAKE_BUILD_TYPE=debug -DEXTRA_C_FLAGS="-Wall"
           cmake --build build/Debug -j 8
       #第四步 执行unity testh函数
       - name: unity test
